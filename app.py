@@ -167,7 +167,7 @@ with st.sidebar:
             placeholder="e.g., research-papers (min 3 chars, a-z, 0-9, ., _, -)",
             help="Collection name must be 3-512 characters, start/end with letter/number, and contain only: a-z, A-Z, 0-9, ., _, -"
         )
-        if st.button("Create Collection"):
+        if st.button("Create Collection", key="create_collection_sidebar"):
             if new_collection_name:
                 # Validate collection name
                 from features.multi_document import DocumentCollection
@@ -555,7 +555,7 @@ with tab3:
         placeholder="e.g., research-papers (min 3 chars)",
         help="Must be 3-512 characters, start/end with letter/number, and contain only: a-z, A-Z, 0-9, ., _, -"
     )
-    if st.button("Create Collection"):
+    if st.button("Create Collection", key="create_collection_tab"):
         if new_col:
             # Validate collection name
             from features.multi_document import DocumentCollection
