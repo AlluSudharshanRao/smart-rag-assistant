@@ -57,27 +57,24 @@ def get_embeddings() -> Embeddings:
     Returns:
         Embeddings instance (OpenAI or Sentence Transformers)
     """
-    # Prefer OpenAI if API key is available
-    if settings.openai_api_key and (settings.embeddings_model == "openai" or settings.embeddings_model == "sentence-transformers"):
-        try:
-            logger.info("Using OpenAI embeddings (API key available)")
-            return OpenAIEmbeddings(openai_api_key=settings.openai_api_key)
-        except Exception as e:
-            logger.warning(f"Failed to use OpenAI embeddings: {e}. Falling back to sentence-transformers.")
+    # If OpenAI is explicitly requested or default, and API key is available, use OpenAI
+    if settings.embeddings_model == "openai":
+        if not settings.openai_api_key:
+            logger.warning("OpenAI API key not found. Falling back to sentence-transformers.")
+            return SentenceTransformerEmbeddings()
+        logger.info("Using OpenAI embeddings")
+        return OpenAIEmbeddings(openai_api_key=settings.openai_api_key)
     
-    # Fall back to sentence-transformers
+    # If sentence-transformers is requested, use it (or if no API key available)
     if settings.embeddings_model == "sentence-transformers" or not settings.openai_api_key:
         logger.info("Using Sentence Transformers embeddings")
         return SentenceTransformerEmbeddings()
     
-    # If explicitly set to OpenAI but no key, raise error
-    if settings.embeddings_model == "openai" and not settings.openai_api_key:
-        raise ValueError(
-            "OpenAI API key required when using OpenAI embeddings. "
-            "Set OPENAI_API_KEY environment variable or use sentence-transformers."
-        )
-    
-    # Default fallback
-    logger.info("Using Sentence Transformers embeddings (default)")
-    return SentenceTransformerEmbeddings()
+    # Default: try OpenAI if key available, else sentence-transformers
+    if settings.openai_api_key:
+        logger.info("Using OpenAI embeddings (default with API key)")
+        return OpenAIEmbeddings(openai_api_key=settings.openai_api_key)
+    else:
+        logger.info("Using Sentence Transformers embeddings (default, no API key)")
+        return SentenceTransformerEmbeddings()
 
