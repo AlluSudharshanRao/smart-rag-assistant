@@ -362,42 +362,10 @@ with tab1:
                         st.text(f"Source {i}:")
                         st.text(source["content"])
                         st.json(source["metadata"])
-        # Check if vectorstore is initialized
-        if st.session_state.vectorstore is None:
-            st.warning("⚠️ **Please upload and process a document first!**")
-            st.info("💡 **Steps:** 1) Upload a file in the sidebar → 2) Click 'Process & Index Document' → 3) Then ask questions here!")
-        else:
-            # Initialize RAG chain if not already done
-            if st.session_state.rag_chain is None:
-                collection = st.session_state.collection_manager.get_current_collection()
-                st.session_state.rag_chain = RAGChain(collection.vectorstore)
-            
-            # Add user message to history
-            st.session_state.chat_history.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-            
-            # Get response with timing
-            with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
-                    import time
-                    start_time = time.time()
-                    result = st.session_state.rag_chain.query(prompt)
-                    response_time = time.time() - start_time
-                    answer = result["answer"]
-                    sources = result["source_documents"]
-                    
-                    st.markdown(answer)
-                    
-                    if sources:
-                        with st.expander("📚 View Sources"):
-                            for i, source in enumerate(sources, 1):
-                                st.text(f"Source {i}:")
-                                st.text(source["content"])
-                                st.json(source["metadata"])
-            
-            # Track evaluation (auto-evaluate with improved metrics)
-            retrieved_docs = len(sources)
+    
+    # Show message if no documents uploaded
+    if not st.session_state.chat_history:
+        st.info("👆 **Use the chat input at the bottom of the page to ask questions!**")
             
             # Calculate relevance score more realistically
             # Based on: number of sources retrieved, answer length, and source content
