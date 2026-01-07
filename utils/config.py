@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-3.5-turbo"  # Cheapest model: $0.0015/1K input, $0.002/1K output
     
     # Embeddings Settings
-    embeddings_model: str = "sentence-transformers"  # or "openai"
+    embeddings_model: str = "openai"  # Default to OpenAI if API key available, else "sentence-transformers"
     sentence_transformer_model: str = "all-MiniLM-L6-v2"  # Fast and efficient
     
     # Vector Database Settings
