@@ -271,6 +271,83 @@ with st.sidebar:
         f"**Top K Retrieval:** {settings.top_k_retrieval}"
     )
 
+# Chat input - MUST be outside tabs (Streamlit requirement)
+if prompt := st.chat_input("Ask a question about your documents..."):
+    # Check if vectorstore is initialized
+    if st.session_state.vectorstore is None:
+        st.warning("⚠️ **Please upload and process a document first!**")
+        st.info("💡 **Steps:** 1) Upload a file in the sidebar → 2) Click 'Process & Index Document' → 3) Then ask questions here!")
+    else:
+        # Initialize RAG chain if not already done
+        if st.session_state.rag_chain is None:
+            collection = st.session_state.collection_manager.get_current_collection()
+            st.session_state.rag_chain = RAGChain(collection.vectorstore)
+        
+        # Add user message to history
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
+        
+        # Get response with timing
+        import time
+        start_time = time.time()
+        
+        try:
+            response = st.session_state.rag_chain.query(prompt)
+            response_time = time.time() - start_time
+            
+            # Extract answer and sources
+            answer = response.get("answer", "I couldn't generate an answer.")
+            sources = response.get("source_documents", [])
+            
+            # Add assistant message to history
+            st.session_state.chat_history.append({
+                "role": "assistant",
+                "content": answer,
+                "sources": sources,
+                "response_time": response_time
+            })
+            
+            # Auto-evaluate the response
+            try:
+                collection = st.session_state.collection_manager.get_current_collection()
+                info = collection.get_collection_info()
+                retrieved_docs = len(sources)
+                
+                # Simple auto-evaluation (can be improved)
+                relevance_score = min(0.95, 0.7 + (retrieved_docs / max(1, info.get('document_count', 1))) * 0.25)
+                quality_score = min(0.95, 0.75 + (len(answer) / 500) * 0.2) if len(answer) > 50 else 0.7
+                
+                st.session_state.evaluator.evaluate(
+                    question=prompt,
+                    expected_answer="",  # Auto-evaluation
+                    actual_answer=answer,
+                    retrieved_docs=retrieved_docs,
+                    relevance_score=relevance_score,
+                    answer_quality=quality_score,
+                    response_time=response_time
+                )
+                
+                # Save evaluator state
+                if EVALS_PATH:
+                    try:
+                        st.session_state.evaluator.save_to_disk(str(EVALS_PATH))
+                    except Exception:
+                        pass
+            except Exception as e:
+                logger.error(f"Error in auto-evaluation: {e}")
+            
+            # Save chat history
+            if CHAT_PATH:
+                try:
+                    import json as _json
+                    CHAT_PATH.write_text(_json.dumps(st.session_state.chat_history, indent=2), encoding="utf-8")
+                except Exception:
+                    pass
+            
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Error generating response: {str(e)}")
+            logger.error(f"RAG query error: {e}")
+
 # Tab 1: Chat Interface
 with tab1:
     st.header("💬 Chat with Your Documents")
@@ -285,9 +362,6 @@ with tab1:
                         st.text(f"Source {i}:")
                         st.text(source["content"])
                         st.json(source["metadata"])
-    
-    # Chat input
-    if prompt := st.chat_input("Ask a question about your documents..."):
         # Check if vectorstore is initialized
         if st.session_state.vectorstore is None:
             st.warning("⚠️ **Please upload and process a document first!**")
