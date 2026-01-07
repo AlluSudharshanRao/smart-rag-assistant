@@ -366,60 +366,6 @@ with tab1:
     # Show message if no documents uploaded
     if not st.session_state.chat_history:
         st.info("👆 **Use the chat input at the bottom of the page to ask questions!**")
-            
-            # Calculate relevance score more realistically
-            # Based on: number of sources retrieved, answer length, and source content
-            if retrieved_docs == 0:
-                relevance_score = 0.0
-            elif retrieved_docs < settings.top_k_retrieval:
-                # Partial retrieval - lower score
-                relevance_score = 0.6 + (retrieved_docs / settings.top_k_retrieval) * 0.3
-            else:
-                # Full retrieval - good score
-                relevance_score = 0.85 + (min(retrieved_docs, settings.top_k_retrieval) / settings.top_k_retrieval) * 0.15
-            
-            # Calculate quality score more realistically
-            # Based on: answer length, presence of sources, answer completeness
-            answer_length_score = min(1.0, len(answer) / 200)  # Optimal around 200 chars
-            has_sources_score = 1.0 if sources else 0.3
-            completeness_score = 1.0 if len(answer) > 30 and not answer.startswith("Sorry") else 0.5
-            
-            answer_quality = (answer_length_score * 0.4 + has_sources_score * 0.4 + completeness_score * 0.2)
-            
-            # Add some realistic variance (not always perfect)
-            import random
-            relevance_score = max(0.5, min(1.0, relevance_score + random.uniform(-0.1, 0.1)))
-            answer_quality = max(0.5, min(1.0, answer_quality + random.uniform(-0.1, 0.1)))
-            
-            st.session_state.evaluator.evaluate(
-                question=prompt,
-                expected_answer="",  # Can be filled manually in evaluation tab
-                actual_answer=answer,
-                retrieved_docs=retrieved_docs,
-                relevance_score=relevance_score,
-                answer_quality=answer_quality,
-                response_time=response_time,
-            )
-            # Persist evaluator to disk (if file system is available)
-            if EVALS_PATH:
-                try:
-                    st.session_state.evaluator.save_to_disk(str(EVALS_PATH))
-                except Exception:
-                    pass
-            
-            # Add assistant response to history
-            st.session_state.chat_history.append({
-                "role": "assistant",
-                "content": answer,
-                "sources": sources,
-            })
-            # Persist chat history to disk (if file system is available)
-            if CHAT_PATH:
-                try:
-                    import json as _json
-                    CHAT_PATH.write_text(_json.dumps(st.session_state.chat_history, ensure_ascii=False, indent=2), encoding="utf-8")
-                except Exception:
-                    pass
 
 # Tab 2: Analytics Dashboard
 with tab2:
