@@ -7,14 +7,29 @@ from typing import Optional
 
 def get_user_id() -> str:
     """
-    Get or create a unique user ID for the current session.
-    Uses a combination of session state and browser-based identification.
+    Get or create a persistent user ID that survives page refreshes.
+    Uses URL query parameters for persistence across sessions.
     """
-    if "user_id" not in st.session_state:
-        # Try multiple methods to get a stable user identifier
-        user_id = None
-        
-        # Method 1: Try to get Streamlit's session ID (works in some deployments)
+    # First, check if we have it in session state (fast access)
+    if "user_id" in st.session_state:
+        return st.session_state.user_id
+    
+    # Method 1: Check URL query parameters (persists across refreshes)
+    user_id = None
+    try:
+        # Try to get user_id from query parameters
+        query_params = st.query_params
+        if "user_id" in query_params:
+            user_id = query_params["user_id"]
+            # Validate it's a reasonable format (alphanumeric, 12-16 chars)
+            if user_id and user_id.isalnum() and 12 <= len(user_id) <= 24:
+                st.session_state.user_id = user_id
+                return user_id
+    except Exception:
+        pass
+    
+    # Method 2: Try to get Streamlit's session ID (for first-time users)
+    if not user_id:
         try:
             import streamlit.runtime.scriptrunner.script_runner as script_runner
             if hasattr(script_runner, 'get_script_run_ctx'):
@@ -25,28 +40,26 @@ def get_user_id() -> str:
                         user_id = hashlib.md5(session_id.encode()).hexdigest()[:12]
         except:
             pass
-        
-        # Method 2: Try runtime instance (alternative approach)
-        if not user_id:
-            try:
-                runtime = st.runtime.get_instance()
-                if hasattr(runtime, '_session_mgr'):
-                    sessions = runtime._session_mgr.list_sessions()
-                    if sessions:
-                        session_id = sessions[0].id
-                        if session_id:
-                            user_id = hashlib.md5(session_id.encode()).hexdigest()[:12]
-            except:
-                pass
-        
-        # Method 3: Fallback - generate random ID and store in session
-        if not user_id:
-            import secrets
-            user_id = secrets.token_hex(6)
-        
-        st.session_state.user_id = user_id
     
-    return st.session_state.user_id
+    # Method 3: Generate a new random ID
+    if not user_id:
+        import secrets
+        user_id = secrets.token_hex(6)  # 12 characters
+    
+    # Store in session state
+    st.session_state.user_id = user_id
+    
+    # Persist to URL query parameters so it survives refresh
+    try:
+        # Only update query params if not already set (avoid infinite redirects)
+        current_params = st.query_params
+        if "user_id" not in current_params or current_params["user_id"] != user_id:
+            st.query_params["user_id"] = user_id
+    except Exception:
+        # If query params update fails, that's okay - session state will work
+        pass
+    
+    return user_id
 
 
 def get_user_data_dir(base_dir: Path, user_id: str) -> Path:

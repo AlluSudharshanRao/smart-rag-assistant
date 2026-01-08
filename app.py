@@ -371,9 +371,15 @@ except (PermissionError, OSError, Exception) as e:
     logger.warning(f"File system not writable, using in-memory storage: {e}")
     DATA_DIR = None
 
-# Get or create user ID for this session
+# Get or create persistent user ID (survives page refreshes)
 try:
     user_id = get_user_id()
+    # Ensure it's persisted in query params if not already there
+    try:
+        if "user_id" not in st.query_params or st.query_params["user_id"] != user_id:
+            st.query_params["user_id"] = user_id
+    except Exception:
+        pass  # Query params update may not always work, that's okay
 except Exception as e:
     logger.error(f"Error generating user ID: {e}")
     # Fallback to simple random ID
@@ -381,6 +387,11 @@ except Exception as e:
     user_id = secrets.token_hex(6)
     if "user_id" not in st.session_state:
         st.session_state.user_id = user_id
+    # Try to persist fallback ID too
+    try:
+        st.query_params["user_id"] = user_id
+    except Exception:
+        pass
 
 # Get user-specific paths
 EVALS_PATH = get_user_evaluations_path(DATA_DIR, user_id) if DATA_DIR else None
