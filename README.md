@@ -4,24 +4,30 @@ A production-ready Retrieval-Augmented Generation (RAG) system that enables inte
 
 ## ✨ Features
 
-- 📄 **Multi-Format Support**: PDF, DOCX, TXT file uploads
-- 🧠 **Intelligent Chunking**: Smart document splitting with overlap
+- 📄 **Multi-Format Support**: PDF, DOCX, TXT, MD file uploads with batch processing
+- 🧠 **Intelligent Chunking**: Smart document splitting with configurable overlap
 - 🔍 **Vector Search**: Semantic similarity search using embeddings
-- 💬 **Conversational Q&A**: Multi-turn conversations with context
-- 📚 **Source Citations**: Traceable answers with source documents
-- 🎨 **Web Interface**: Beautiful Streamlit UI
-- 🐳 **Docker Ready**: Containerized for easy deployment
-- 🔌 **REST API**: FastAPI backend for integration
+- 💬 **Conversational Q&A**: Multi-turn conversations with context preservation
+- 📚 **Source Citations**: Traceable answers with source documents and metadata
+- 📁 **Multi-Document Collections**: Organize documents into separate collections
+- 📊 **Analytics Dashboard**: Track query performance, relevance, and response times
+- 📈 **Evaluation Metrics**: Monitor precision, recall, F1 score, and answer quality
+- 💾 **Export/Import**: Export chat history, evaluation results, and collection data
+- 🗑️ **Document Management**: View and delete documents by source file
+- 🎨 **Modern UI**: Beautiful Streamlit interface with tabbed navigation
+- 🐳 **Docker Ready**: Containerized for easy local deployment
+- ☁️ **Cloud Deployed**: Live on Streamlit Cloud
 
 ## 🛠️ Tech Stack
 
-- **Backend**: FastAPI
-- **LLM Framework**: LangChain
-- **Vector Database**: ChromaDB (local) / Qdrant (cloud option)
-- **Embeddings**: Sentence Transformers (free, local) / OpenAI
-- **LLM**: OpenAI GPT / Ollama (local option)
-- **Frontend**: Streamlit
+- **Frontend**: Streamlit 1.28.1
+- **LLM Framework**: LangChain 0.1.20
+- **Vector Database**: ChromaDB 0.4.18
+- **Embeddings**: Sentence Transformers (local, free) / OpenAI (optional)
+- **LLM**: OpenAI GPT-3.5-turbo / GPT-4
+- **Document Processing**: PyPDF, python-docx
 - **Containerization**: Docker & Docker Compose
+- **Deployment**: Streamlit Cloud
 
 ## 📋 Prerequisites
 
@@ -59,10 +65,13 @@ docker-compose up -d
 
 ## 📖 Usage
 
-1. **Upload Documents**: Click "Upload Document" and select PDF/DOCX/TXT files
-2. **Process Documents**: Click "Process & Index" to chunk and embed documents
-3. **Ask Questions**: Type questions in the chat interface
-4. **Get Answers**: Receive accurate answers with source citations
+1. **Upload Documents**: Use the sidebar to upload PDF/DOCX/TXT/MD files (single or batch)
+2. **Process Documents**: Click "Process & Index Document" to chunk and embed documents
+3. **Manage Collections**: Create separate collections to organize different document sets
+4. **Ask Questions**: Type questions in the chat interface at the bottom of the page
+5. **View Sources**: Expand source citations to see the retrieved document chunks
+6. **Monitor Performance**: Check the Analytics tab for query metrics and evaluation results
+7. **Export Data**: Download chat history, evaluation results, and collection info from the Export/Import tab
 
 ## 🏗️ Architecture
 
@@ -76,61 +85,100 @@ User Question → Embedding → Vector Search → Context Retrieval → LLM → 
 
 ```
 smart-rag-assistant/
-├── app.py                 # Streamlit frontend
-├── api/
-│   ├── __init__.py
-│   ├── main.py           # FastAPI backend
-│   └── routes.py         # API routes
+├── app.py                      # Main Streamlit application
 ├── core/
 │   ├── __init__.py
-│   ├── document_processor.py  # Document parsing & chunking
-│   ├── embeddings.py          # Embedding generation
-│   └── rag_chain.py           # RAG pipeline
+│   ├── document_processor.py   # Document parsing & chunking
+│   ├── embeddings.py           # Embedding generation (OpenAI/Sentence Transformers)
+│   └── rag_chain.py            # RAG pipeline implementation
+├── features/
+│   ├── __init__.py
+│   ├── multi_document.py       # Multi-collection management
+│   └── evaluation.py           # RAG evaluation metrics
 ├── utils/
 │   ├── __init__.py
-│   └── config.py         # Configuration management
-├── requirements.txt
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
-## 🧪 Testing
-
-```bash
-# Run tests
-pytest tests/
-
-# Run with coverage
-pytest --cov=core --cov=api tests/
+│   └── config.py               # Configuration management
+├── requirements.txt            # Python dependencies
+├── runtime.txt                 # Python version for Streamlit Cloud
+├── Dockerfile                  # Docker container configuration
+├── docker-compose.yml          # Docker Compose setup
+├── env_template.txt            # Environment variables template
+├── .gitignore                  # Git ignore rules
+└── README.md                   # Project documentation
 ```
 
 ## 🚀 Deployment
 
-### Deploy to Render/Railway
+### Streamlit Cloud (Recommended)
 
-1. Fork this repository
-2. Connect to Render/Railway
-3. Set environment variables
-4. Deploy!
+The application is currently deployed on Streamlit Cloud:
 
-### Deploy to AWS/GCP/Azure
+1. Push the repository to GitHub
+2. Connect your GitHub account to [Streamlit Cloud](https://streamlit.io/cloud)
+3. Select the repository and set the main file to `app.py`
+4. Configure secrets (if needed) in Streamlit Cloud dashboard:
+   - `OPENAI_API_KEY`: Your OpenAI API key (optional)
+5. Deploy!
 
-See `deployment/` directory for cloud-specific instructions.
+### Local Docker Deployment
 
-## 📊 Performance Metrics
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
 
-- **Chunking Speed**: ~100 pages/sec
-- **Query Latency**: <2s for most queries
-- **Accuracy**: 85-90% on domain-specific documents
+# Access application at http://localhost:8501
+```
+
+### Other Cloud Platforms
+
+For AWS/GCP/Azure deployment, adapt the Docker configuration or deploy directly using their container services.
+
+## 📊 Key Features Details
+
+- **Document Processing**: Supports PDF, DOCX, TXT, and Markdown files with automatic chunking
+- **Embedding Options**: 
+  - Sentence Transformers (local, free) - default
+  - OpenAI embeddings (requires API key)
+- **RAG Pipeline**: Uses LangChain with ChromaDB for efficient vector storage and retrieval
+- **Evaluation Metrics**: Automatic tracking of relevance scores, answer quality, precision, recall, and response times
+- **Data Persistence**: Chat history and evaluation results are saved locally (or in-memory for cloud deployments)
+- **Collection Management**: Create multiple collections to organize documents by topic or project
+
+## 🔧 Environment Variables
+
+Create a `.env` file based on `env_template.txt`:
+
+```bash
+# For local embeddings (FREE - no API key needed)
+EMBEDDINGS_MODEL=sentence-transformers
+
+# OR for OpenAI embeddings (requires API key)
+# OPENAI_API_KEY=your-api-key-here
+# EMBEDDINGS_MODEL=openai
+# OPENAI_MODEL=gpt-3.5-turbo
+
+# Vector Database
+CHROMA_PERSIST_DIRECTORY=./chroma_db
+
+# Document Processing
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
+
+# RAG Settings
+TOP_K_RETRIEVAL=3
+TEMPERATURE=0.7
+MAX_TOKENS=500
+```
 
 ## 🤝 Contributing
 
-Contributions welcome! Please read CONTRIBUTING.md first.
+Contributions welcome! This project is open for improvements and feature additions.
 
 ## 🔗 Live Demo
 
-[Add deployed link here]
+🌐 **Live Application**: [https://smart-rag-assistant.streamlit.app/](https://smart-rag-assistant.streamlit.app/)
+
+Try the application online - upload documents, ask questions, and explore the analytics dashboard!
 
 ## 📸 Screenshots
 
