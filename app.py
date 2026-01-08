@@ -447,13 +447,16 @@ def process_uploaded_file(uploaded_file, collection_name: str = None):
         collection_name = collection_name or st.session_state.current_collection
         collection = st.session_state.collection_manager.get_collection(collection_name)
         
-        # Add metadata including collection name
+        # Add metadata including collection name, uploader, and timestamp
         file_size = len(uploaded_file.read())
         uploaded_file.seek(0)  # Reset file pointer
+        import datetime
         metadata = {
             "source_file": uploaded_file.name,
             "file_size": file_size,
             "collection_name": collection_name,  # Store collection name with each document
+            "uploaded_by": user_id,  # Track who uploaded the document
+            "uploaded_at": datetime.datetime.now().isoformat(),  # Track when it was uploaded
         }
         
         # Add to collection
@@ -1370,13 +1373,21 @@ with tab5:
     
     # Document List
     st.subheader("📋 Document List")
+    st.info("🌐 **Collaborative:** All documents uploaded by any user are visible to everyone in this collection. Your chat history remains private.")
     
     try:
         # Get documents grouped by source file using the new method
         source_files = collection.get_documents_by_source()
         
         if source_files:
-            st.info(f"📊 Found {len(source_files)} unique document(s) in this collection")
+            # Count documents by uploader
+            uploader_count = {}
+            for source_file, info in source_files.items():
+                metadata = info.get('metadata', {})
+                uploader = metadata.get('uploaded_by', 'Unknown')
+                uploader_count[uploader] = uploader_count.get(uploader, 0) + 1
+            
+            st.info(f"📊 Found {len(source_files)} unique document(s) in this collection (from {len(uploader_count)} user(s))")
             
             # Display documents
             for source_file, info in source_files.items():
@@ -1385,11 +1396,35 @@ with tab5:
                     with col1:
                         st.write(f"**Chunks:** {info['count']}")
                         if info.get('metadata'):
-                            file_size = info['metadata'].get('file_size', 'N/A')
+                            metadata = info['metadata']
+                            file_size = metadata.get('file_size', 'N/A')
                             if file_size != 'N/A':
                                 file_size_str = f"{file_size:,} bytes" if isinstance(file_size, int) else str(file_size)
                                 st.write(f"**File Size:** {file_size_str}")
-                            st.json(info['metadata'])
+                            
+                            # Display uploader information
+                            uploaded_by = metadata.get('uploaded_by', 'Unknown')
+                            uploaded_at = metadata.get('uploaded_at', 'Unknown')
+                            
+                            if uploaded_by != 'Unknown' or uploaded_at != 'Unknown':
+                                st.markdown("---")
+                                st.markdown("**📤 Upload Information:**")
+                                if uploaded_by != 'Unknown':
+                                    # Format user ID for display (show first 8 chars)
+                                    display_user = uploaded_by[:8] + "..." if len(uploaded_by) > 8 else uploaded_by
+                                    st.write(f"**Uploaded by:** `{display_user}`")
+                                if uploaded_at != 'Unknown':
+                                    try:
+                                        from datetime import datetime
+                                        dt = datetime.fromisoformat(uploaded_at.replace('Z', '+00:00'))
+                                        formatted_date = dt.strftime('%Y-%m-%d %H:%M:%S')
+                                        st.write(f"**Uploaded at:** {formatted_date}")
+                                    except:
+                                        st.write(f"**Uploaded at:** {uploaded_at}")
+                            
+                            # Show full metadata in expandable section
+                            with st.expander("🔍 View Full Metadata"):
+                                st.json(metadata)
                     with col2:
                         delete_key = f"delete_doc_{source_file}_{hash(source_file)}"
                         if st.button(
