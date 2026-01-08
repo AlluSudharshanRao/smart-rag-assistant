@@ -646,11 +646,35 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.markdown("### ⚙️ Settings")
+    
+    # Hybrid Search Toggle
+    use_hybrid = st.checkbox(
+        "🔀 Enable Hybrid Search",
+        value=settings.use_hybrid_search,
+        help="Combine semantic (vector) and keyword (BM25) search for better retrieval",
+        key="hybrid_search_toggle"
+    )
+    if use_hybrid != settings.use_hybrid_search:
+        settings.use_hybrid_search = use_hybrid
+        # Reset RAG chain to apply new setting
+        if hasattr(st.session_state, 'rag_chain'):
+            st.session_state.rag_chain = None
+    
+    # RAGAS Evaluation Toggle
+    enable_ragas = st.checkbox(
+        "📊 Enable RAGAS Metrics",
+        value=st.session_state.get("enable_ragas", True),
+        help="Calculate RAGAS metrics (Faithfulness, Answer Relevancy, Context Precision/Recall). Note: This may slow down responses.",
+        key="ragas_toggle"
+    )
+    st.session_state.enable_ragas = enable_ragas
+    
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1rem; border-radius: 10px; border-left: 4px solid #0ea5e9;">
-        <p style="margin: 0.5rem 0;"><strong>Chunk Size:</strong> <span style="color: #0ea5e9; font-weight: 600;">{settings.chunk_size}</span></p>
-        <p style="margin: 0.5rem 0;"><strong>Embeddings:</strong> <span style="color: #0ea5e9; font-weight: 600;">{settings.embeddings_model}</span></p>
-        <p style="margin: 0.5rem 0;"><strong>Top K Retrieval:</strong> <span style="color: #0ea5e9; font-weight: 600;">{settings.top_k_retrieval}</span></p>
+    <div style="background: #f9fafb; padding: 1rem; border-radius: 10px; border-left: 4px solid #6b7280; margin-top: 0.5rem;">
+        <p style="margin: 0.5rem 0;"><strong>Chunk Size:</strong> <span style="color: #374151; font-weight: 600;">{settings.chunk_size}</span></p>
+        <p style="margin: 0.5rem 0;"><strong>Embeddings:</strong> <span style="color: #374151; font-weight: 600;">{settings.embeddings_model}</span></p>
+        <p style="margin: 0.5rem 0;"><strong>Top K Retrieval:</strong> <span style="color: #374151; font-weight: 600;">{settings.top_k_retrieval}</span></p>
+        {f'<p style="margin: 0.5rem 0;"><strong>Hybrid Search:</strong> <span style="color: #374151; font-weight: 600;">Semantic ({settings.semantic_weight*100:.0f}%) + Keyword ({settings.keyword_weight*100:.0f}%)</span></p>' if use_hybrid else '<p style="margin: 0.5rem 0; color: #9ca3af; font-size: 0.85rem;">Hybrid search disabled - using semantic only</p>'}
     </div>
     """, unsafe_allow_html=True)
 
@@ -664,10 +688,19 @@ if prompt := st.chat_input("Ask a question about the documents..."):
         st.warning("⚠️ **Please upload and process a document first!**")
         st.info("💡 **Steps:** 1) Upload a file in the sidebar → 2) Click 'Process & Index Document' → 3) Then ask questions here!")
     else:
-        # Initialize RAG chain if not already done
+        # Initialize RAG chain if not already done or if settings changed
+        needs_reinit = False
         if st.session_state.rag_chain is None:
+            needs_reinit = True
+        elif hasattr(st.session_state, 'last_hybrid_setting') and st.session_state.get('last_hybrid_setting') != settings.use_hybrid_search:
+            needs_reinit = True
+        
+        if needs_reinit:
             collection = st.session_state.collection_manager.get_current_collection()
             st.session_state.rag_chain = RAGChain(collection.vectorstore)
+            st.session_state.last_hybrid_setting = settings.use_hybrid_search
+        elif not hasattr(st.session_state, 'last_hybrid_setting'):
+            st.session_state.last_hybrid_setting = settings.use_hybrid_search
         
         # Add user message to history
         st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -714,6 +747,10 @@ if prompt := st.chat_input("Ask a question about the documents..."):
                 relevance_score = min(0.95, 0.7 + (retrieved_docs / max(1, info.get('document_count', 1))) * 0.25)
                 quality_score = min(0.95, 0.75 + (len(answer) / 500) * 0.2) if len(answer) > 50 else 0.7
                 
+                # Extract contexts for RAGAS evaluation
+                contexts = [source.get("content", "") for source in sources]
+                
+                # Evaluate with RAGAS metrics
                 st.session_state.evaluator.evaluate(
                     question=prompt,
                     expected_answer="",  # Auto-evaluation
@@ -721,7 +758,9 @@ if prompt := st.chat_input("Ask a question about the documents..."):
                     retrieved_docs=retrieved_docs,
                     relevance_score=relevance_score,
                     answer_quality=quality_score,
-                    response_time=response_time
+                    response_time=response_time,
+                    contexts=contexts,
+                    calculate_ragas=st.session_state.get("enable_ragas", True),  # Allow user to toggle
                 )
                 
                 # Save evaluator state
@@ -994,7 +1033,7 @@ with tab2:
         st.markdown("---")
         
         # Metrics Summary Section
-        st.subheader("📄 Metrics Summary")
+        st.markdown("### 📄 Standard Metrics Summary")
         metrics_data = {
             "Documents Processed": collection_info.get("document_count", 0),
             "Total Queries": eval_summary.get("total_queries", 0),
@@ -1014,6 +1053,52 @@ with tab2:
             st.markdown("**Additional Metrics:**")
             for key, value in list(metrics_data.items())[3:]:
                 st.write(f"- **{key}:** {value}")
+        
+        # RAGAS Metrics Section
+        if eval_summary.get("avg_faithfulness", 0.0) > 0 or eval_summary.get("avg_answer_relevancy", 0.0) > 0:
+            st.markdown("---")
+            st.markdown("### 🎯 RAGAS Metrics (Industry Standard Evaluation)")
+            st.info("📊 **RAGAS** (Retrieval Augmented Generation Assessment) metrics provide industry-standard evaluation of RAG systems.")
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.markdown(f"""
+                <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">✓ Faithfulness</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{eval_summary.get('avg_faithfulness', 0.0):.1%}</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Answer grounded in context</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown(f"""
+                <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🎯 Answer Relevancy</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{eval_summary.get('avg_answer_relevancy', 0.0):.1%}</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Answer addresses question</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col3:
+                st.markdown(f"""
+                <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">📍 Context Precision</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{eval_summary.get('avg_context_precision', 0.0):.1%}</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Retrieval precision</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col4:
+                st.markdown(f"""
+                <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🔍 Context Recall</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{eval_summary.get('avg_context_recall', 0.0):.1%}</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Retrieval recall</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.caption("💡 These metrics follow industry-standard RAGAS evaluation framework for comprehensive RAG system assessment.")
         
         # Download Metrics
         if collection_info.get("document_count", 0) > 0 and eval_summary.get("total_queries", 0) > 0:

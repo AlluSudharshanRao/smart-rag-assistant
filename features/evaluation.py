@@ -1,10 +1,11 @@
 """Evaluation metrics for RAG system."""
-from typing import List, Dict, Tuple
-from dataclasses import dataclass
+from typing import List, Dict, Tuple, Optional
+from dataclasses import dataclass, field
 import json
 from pathlib import Path
 
 from loguru import logger
+from features.ragas_metrics import RAGASEvaluator
 
 
 @dataclass
@@ -18,6 +19,12 @@ class EvaluationResult:
     answer_quality: float
     response_time: float = 0.0  # Response time in seconds
     timestamp: str = ""
+    # RAGAS metrics
+    faithfulness: float = 0.0
+    answer_relevancy: float = 0.0
+    context_precision: float = 0.0
+    context_recall: float = 0.0
+    contexts: List[str] = field(default_factory=list)  # Retrieved contexts for RAGAS
 
 
 class RAGEvaluator:
@@ -25,6 +32,7 @@ class RAGEvaluator:
     
     def __init__(self):
         self.results: List[EvaluationResult] = []
+        self.ragas_evaluator = RAGASEvaluator()
         self.metrics = {
             "total_queries": 0,
             "avg_relevance": 0.0,
@@ -32,6 +40,11 @@ class RAGEvaluator:
             "avg_response_time": 0.0,
             "precision": 0.0,
             "recall": 0.0,
+            # RAGAS metrics
+            "avg_faithfulness": 0.0,
+            "avg_answer_relevancy": 0.0,
+            "avg_context_precision": 0.0,
+            "avg_context_recall": 0.0,
         }
     
     def evaluate(
@@ -43,9 +56,44 @@ class RAGEvaluator:
         relevance_score: float = 0.0,
         answer_quality: float = 0.0,
         response_time: float = 0.0,
+        contexts: Optional[List[str]] = None,
+        calculate_ragas: bool = True,
     ) -> EvaluationResult:
-        """Evaluate a single query."""
+        """
+        Evaluate a single query.
+        
+        Args:
+            question: User's question
+            expected_answer: Expected/gold answer (for evaluation)
+            actual_answer: Generated answer
+            retrieved_docs: Number of retrieved documents
+            relevance_score: Relevance score (0-1)
+            answer_quality: Answer quality score (0-1)
+            response_time: Response time in seconds
+            contexts: List of retrieved context strings for RAGAS evaluation
+            calculate_ragas: Whether to calculate RAGAS metrics (can be slow)
+        """
         from datetime import datetime
+        
+        # Calculate RAGAS metrics if requested and contexts provided
+        ragas_scores = {
+            "faithfulness": 0.0,
+            "answer_relevancy": 0.0,
+            "context_precision": 0.0,
+            "context_recall": 0.0,
+        }
+        
+        if calculate_ragas and contexts and self.ragas_evaluator.available:
+            try:
+                ragas_scores = self.ragas_evaluator.evaluate_all(
+                    question=question,
+                    answer=actual_answer,
+                    contexts=contexts,
+                    ground_truth=expected_answer if expected_answer else None
+                )
+                logger.debug(f"RAGAS scores: {ragas_scores}")
+            except Exception as e:
+                logger.warning(f"Error calculating RAGAS metrics: {e}")
         
         result = EvaluationResult(
             question=question,
@@ -56,6 +104,11 @@ class RAGEvaluator:
             answer_quality=answer_quality,
             response_time=response_time,
             timestamp=datetime.now().isoformat(),
+            faithfulness=ragas_scores.get("faithfulness", 0.0),
+            answer_relevancy=ragas_scores.get("answer_relevancy", 0.0),
+            context_precision=ragas_scores.get("context_precision", 0.0),
+            context_recall=ragas_scores.get("context_recall", 0.0),
+            contexts=contexts or [],
         )
         
         self.results.append(result)
@@ -76,9 +129,23 @@ class RAGEvaluator:
         rt_values = [r.response_time for r in self.results if hasattr(r, 'response_time') and r.response_time and r.response_time > 0]
         avg_rt = (sum(rt_values) / len(rt_values)) if rt_values else 0.0
         
+        # Calculate RAGAS averages
+        results_with_ragas = [r for r in self.results if hasattr(r, 'faithfulness')]
+        if results_with_ragas:
+            avg_faith = sum(r.faithfulness for r in results_with_ragas) / len(results_with_ragas)
+            avg_ans_rel = sum(r.answer_relevancy for r in results_with_ragas) / len(results_with_ragas)
+            avg_ctx_prec = sum(r.context_precision for r in results_with_ragas) / len(results_with_ragas)
+            avg_ctx_rec = sum(r.context_recall for r in results_with_ragas) / len(results_with_ragas)
+        else:
+            avg_faith = avg_ans_rel = avg_ctx_prec = avg_ctx_rec = 0.0
+        
         self.metrics["avg_relevance"] = round(avg_rel, 4)
         self.metrics["avg_quality"] = round(avg_qual, 4)
         self.metrics["avg_response_time"] = round(avg_rt, 4)
+        self.metrics["avg_faithfulness"] = round(avg_faith, 4)
+        self.metrics["avg_answer_relevancy"] = round(avg_ans_rel, 4)
+        self.metrics["avg_context_precision"] = round(avg_ctx_prec, 4)
+        self.metrics["avg_context_recall"] = round(avg_ctx_rec, 4)
     
     def get_summary(self) -> Dict:
         """Get evaluation summary."""
@@ -106,6 +173,11 @@ class RAGEvaluator:
                     "quality": r.answer_quality,
                     "response_time": r.response_time,
                     "timestamp": r.timestamp,
+                    # RAGAS metrics
+                    "faithfulness": getattr(r, 'faithfulness', 0.0),
+                    "answer_relevancy": getattr(r, 'answer_relevancy', 0.0),
+                    "context_precision": getattr(r, 'context_precision', 0.0),
+                    "context_recall": getattr(r, 'context_recall', 0.0),
                 }
                 for r in self.results
             ]
@@ -146,6 +218,11 @@ class RAGEvaluator:
                     answer_quality=r.get("quality", 0.0),
                     response_time=r.get("response_time", 0.0) or 0.0,
                     timestamp=r.get("timestamp", ""),
+                    faithfulness=r.get("faithfulness", 0.0),
+                    answer_relevancy=r.get("answer_relevancy", 0.0),
+                    context_precision=r.get("context_precision", 0.0),
+                    context_recall=r.get("context_recall", 0.0),
+                    contexts=r.get("contexts", []),
                 )
                 for r in results
             ]

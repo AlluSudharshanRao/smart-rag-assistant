@@ -1,0 +1,5 @@
+[33mf8ba06d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Make tabs bigger and UI more colorful: Increase tab sizes, add vibrant gradients, colorful animations, and enhanced visual design
+[33mab5034c[m Fix f-string syntax error: Convert .format() calls to proper f-string syntax
+[33mf902451[m Add enhanced styling to usage statistics, collections, and document management sections
+[33m13d6a22[m Enhance UI with modern styling: gradients, cards, improved typography, and professional design
+[33m287a270[m Fix syntax error: Correct indentation for collection_name handling inside try block

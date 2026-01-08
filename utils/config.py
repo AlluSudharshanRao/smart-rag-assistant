@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     temperature: float = 0.3  # Lower = more focused, cheaper (less randomness)
     max_tokens: int = 300  # Reduced to save costs (shorter answers)
     
+    # Hybrid Search Settings
+    use_hybrid_search: bool = True
+    semantic_weight: float = 0.7  # Weight for semantic search (0-1)
+    keyword_weight: float = 0.3   # Weight for keyword search (0-1)
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
