@@ -786,10 +786,3 @@ with tab5:
         
         st.info("💡 **Note:** Collection data is stored in ChromaDB and cannot be imported via JSON. Use the Collections tab to manage collections.")
 
-# Footer (outside tabs)
-st.markdown("---")
-st.markdown(
-    "Built with ❤️ using Streamlit, LangChain, and ChromaDB | "
-    "[GitHub](https://github.com/username/smart-rag-assistant)"
-)
-

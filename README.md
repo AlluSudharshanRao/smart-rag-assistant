@@ -170,21 +170,9 @@ TEMPERATURE=0.7
 MAX_TOKENS=500
 ```
 
-## 🤝 Contributing
-
-Contributions welcome! This project is open for improvements and feature additions.
-
 ## 🔗 Live Demo
 
 🌐 **Live Application**: [https://smart-rag-assistant.streamlit.app/](https://smart-rag-assistant.streamlit.app/)
 
 Try the application online - upload documents, ask questions, and explore the analytics dashboard!
-
-## 📸 Screenshots
-
-[Add screenshots of the application]
-
----
-
-**Built with ❤️ for AI/ML Intern Applications**
 
