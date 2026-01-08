@@ -332,16 +332,16 @@ if prompt := st.chat_input("Ask a question about the documents..."):
             answer = response.get("answer", "An answer could not be generated.")
             sources = response.get("source_documents", [])
             
-        # Get current collection name for tracking and add to source metadata
-        current_collection_name = st.session_state.current_collection
-        
-        # Ensure all sources have collection_name in metadata
-        for source in sources:
-            if "metadata" not in source:
-                source["metadata"] = {}
-            # Add collection name if missing (for backward compatibility)
-            if "collection_name" not in source["metadata"]:
-                source["metadata"]["collection_name"] = current_collection_name
+            # Get current collection name for tracking and add to source metadata
+            current_collection_name = st.session_state.current_collection
+            
+            # Ensure all sources have collection_name in metadata
+            for source in sources:
+                if "metadata" not in source:
+                    source["metadata"] = {}
+                # Add collection name if missing (for backward compatibility)
+                if "collection_name" not in source["metadata"]:
+                    source["metadata"]["collection_name"] = current_collection_name
             
             # Add assistant message to history with collection info
             st.session_state.chat_history.append({
