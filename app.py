@@ -1,4 +1,6 @@
-"""Streamlit frontend for the RAG Document Assistant."""
+"""Streamlit frontend for the RAG Document Assistant.
+All changes pushed to GitHub - ready for deployment.
+"""
 import os
 import tempfile
 import json
