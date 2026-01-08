@@ -28,7 +28,303 @@ st.set_page_config(
     page_title="Smart RAG Document Assistant",
     page_icon="📚",
     layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': "Smart RAG Document Assistant - AI-powered document Q&A system"
+    }
 )
+
+# Custom CSS for modern, professional UI
+st.markdown("""
+<style>
+    /* Main app styling */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 1400px;
+    }
+    
+    /* Header styling */
+    h1 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    h2 {
+        color: #1f2937;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #667eea;
+        padding-left: 1rem;
+    }
+    
+    h3 {
+        color: #374151;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    }
+    
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    }
+    
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+        color: #1f2937;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Metric cards */
+    [data-testid="stMetricValue"] {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    
+    /* Info boxes */
+    .stInfo {
+        background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .stSuccess {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border-left: 4px solid #10b981;
+        border-radius: 8px;
+    }
+    
+    .stWarning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left: 4px solid #f59e0b;
+        border-radius: 8px;
+    }
+    
+    .stError {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-left: 4px solid #ef4444;
+        border-radius: 8px;
+    }
+    
+    /* Tabs styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: #f9fafb;
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background: #f9fafb;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+    
+    /* Chat message styling */
+    [data-testid="stChatMessage"] {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    /* Input styling */
+    .stTextInput > div > div > input {
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Selectbox styling */
+    .stSelectbox > div > div {
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+    }
+    
+    /* File uploader styling */
+    [data-testid="stFileUploader"] {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 2rem;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+    }
+    
+    [data-testid="stFileUploader"]:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+    
+    /* Progress bar */
+    .stProgress > div > div > div {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* Code blocks */
+    .stCodeBlock {
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+    
+    /* JSON viewer */
+    pre {
+        border-radius: 8px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+    }
+    
+    /* Divider styling */
+    hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+        margin: 2rem 0;
+    }
+    
+    /* Card-like containers */
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    
+    /* Badge styling */
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    /* Radio button styling */
+    .stRadio > div {
+        gap: 1rem;
+    }
+    
+    .stRadio > div > label {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .stRadio > div > label:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+    
+    /* Download button */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25);
+    }
+    
+    .stDownloadButton > button:hover {
+        box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    /* Sidebar header */
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #1f2937;
+    }
+    
+    /* Caption styling */
+    .stCaption {
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+    
+    /* Spinner styling */
+    .stSpinner > div {
+        border-color: #667eea;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # Initialize session state
 # For cloud deployment, data persistence may not be available
@@ -152,8 +448,12 @@ def process_uploaded_file(uploaded_file, collection_name: str = None):
 
 
 # UI Layout with tabs
-st.title("📚 Smart RAG Document Assistant")
-st.markdown("Upload documents and ask intelligent questions!")
+st.markdown("""
+<div style="text-align: center; padding: 2rem 0 1.5rem 0; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-radius: 16px; margin-bottom: 2rem;">
+    <h1 style="margin-bottom: 0.5rem; font-size: 2.8rem;">📚 Smart RAG Document Assistant</h1>
+    <p style="font-size: 1.15rem; color: #6b7280; margin: 0; font-weight: 500;">AI-Powered Document Intelligence • Ask Questions, Get Instant Answers</p>
+</div>
+""", unsafe_allow_html=True)
 
 # Create tabs
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -166,11 +466,20 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 
 # Sidebar for document upload
 with st.sidebar:
-    st.header("📄 Document Upload")
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb;">
+        <h2 style="margin: 0; color: #1f2937;">📄 Document Upload</h2>
+        <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 0.9rem;">Manage your documents and collections</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Collection selector
-    st.subheader("📁 Collection Management")
-    st.caption("⚠️ **Important:** Queries search ONLY the selected collection!")
+    st.markdown("### 📁 Collection Management")
+    st.markdown("""
+    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+        <p style="margin: 0; font-size: 0.85rem; color: #92400e;"><strong>⚠️ Important:</strong> Queries search ONLY the selected collection!</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     collection_options = st.session_state.collections_list
     selected_collection = st.selectbox(
@@ -219,11 +528,18 @@ with st.sidebar:
             else:
                 st.warning("⚠️ Please enter a collection name")
     
-    # Collection info
+    # Collection info with better styling
     if st.session_state.current_collection:
         collection = st.session_state.collection_manager.get_current_collection()
         info = collection.get_collection_info()
-        st.caption(f"📊 Documents: {info.get('document_count', 0)}")
+        doc_count = info.get('document_count', 0)
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%); padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #667eea;">
+            <p style="margin: 0; font-size: 0.9rem; color: #1f2937;"><strong>📊 Current Collection Stats</strong></p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: 700; color: #667eea;">{}</p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Documents indexed</p>
+        </div>
+        """.format(doc_count), unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -294,16 +610,22 @@ with st.sidebar:
                 st.rerun()
     
     st.markdown("---")
-    st.markdown("### Session Info")
-    st.caption(f"👤 **User ID:** `{user_id[:8]}...`")
-    st.caption("💡 Each user has isolated chat history and metrics")
-    st.markdown("---")
-    st.markdown("### Settings")
-    st.info(
-        f"**Chunk Size:** {settings.chunk_size}\n\n"
-        f"**Embeddings:** {settings.embeddings_model}\n\n"
-        f"**Top K Retrieval:** {settings.top_k_retrieval}"
-    )
+    st.markdown("### 👤 Session Info")
+    st.markdown(f"""
+    <div style="background: #f9fafb; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e5e7eb;">
+        <p style="margin: 0; font-size: 0.85rem; color: #6b7280;"><strong>User ID:</strong> <code style="background: #e5e7eb; padding: 0.2rem 0.4rem; border-radius: 4px;">{user_id[:8]}...</code></p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #9ca3af;">💡 Each user has isolated chat history and metrics</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("### ⚙️ Settings")
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1rem; border-radius: 10px; border-left: 4px solid #0ea5e9;">
+        <p style="margin: 0.5rem 0;"><strong>Chunk Size:</strong> <span style="color: #0ea5e9; font-weight: 600;">{settings.chunk_size}</span></p>
+        <p style="margin: 0.5rem 0;"><strong>Embeddings:</strong> <span style="color: #0ea5e9; font-weight: 600;">{settings.embeddings_model}</span></p>
+        <p style="margin: 0.5rem 0;"><strong>Top K Retrieval:</strong> <span style="color: #0ea5e9; font-weight: 600;">{settings.top_k_retrieval}</span></p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Chat input - MUST be outside tabs (Streamlit requirement)
 if prompt := st.chat_input("Ask a question about the documents..."):
@@ -396,22 +718,42 @@ if prompt := st.chat_input("Ask a question about the documents..."):
 
 # Tab 1: Chat Interface
 with tab1:
-    st.header("💬 Chat with Documents")
+    st.markdown("""
+    <div style="margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 1rem;">💬 Chat with Documents</h2>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Display current collection info prominently
     collection = st.session_state.collection_manager.get_current_collection()
     collection_info = collection.get_collection_info()
+    doc_count = collection_info.get("document_count", 0)
     
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        if collection_info.get("document_count", 0) > 0:
-            st.info(f"📁 **Active Collection:** `{st.session_state.current_collection}` | 📄 **Documents:** {collection_info.get('document_count', 0)} | 💡 **All queries will search this collection**")
-        else:
-            st.warning(f"⚠️ **Active Collection:** `{st.session_state.current_collection}` | 📄 **No documents** - Please upload and process documents first!")
-    with col2:
-        st.caption("💡 Use sidebar to switch collections")
-    
-    st.markdown("---")
+    if doc_count > 0:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 5px solid #3b82f6; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);">
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                    <p style="margin: 0; font-size: 0.9rem; color: #1e40af; font-weight: 600;">📁 ACTIVE COLLECTION</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #1e3a8a;">{st.session_state.current_collection}</p>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #1e40af; font-weight: 600;">📄 DOCUMENTS INDEXED</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #1e3a8a;">{doc_count}</p>
+                </div>
+                <div>
+                    <p style="margin: 0; font-size: 0.85rem; color: #3b82f6;">💡 All queries will search this collection</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 5px solid #f59e0b; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);">
+            <p style="margin: 0; font-size: 1rem; color: #92400e; font-weight: 600;">⚠️ <strong>Active Collection:</strong> `{st.session_state.current_collection}` | 📄 <strong>No documents</strong></p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #78350f;">Please upload and process documents first in the sidebar!</p>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Display chat history
     for message in st.session_state.chat_history:
@@ -430,18 +772,33 @@ with tab1:
                             source_collection = source_metadata.get("collection_name", collection_used)
                             chunk_id = source_metadata.get("chunk_id", "N/A")
                             
-                            # Display source info clearly
-                            st.markdown(f"### Source {i}")
-                            st.markdown(f"**📁 Collection:** `{source_collection}`")
-                            st.markdown(f"**📄 Document:** `{source_file}`")
-                            if chunk_id != "N/A":
-                                st.markdown(f"**📍 Chunk ID:** {chunk_id}")
-                            st.markdown("**📝 Content:**")
-                            st.text(source["content"][:500] + ("..." if len(source["content"]) > 500 else ""))
-                            with st.expander("🔍 Full Metadata"):
+                            # Display source info with better styling
+                            st.markdown(f"""
+                            <div style="background: #f9fafb; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #667eea;">
+                                <h4 style="margin: 0 0 0.75rem 0; color: #1f2937;">Source {i}</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">📁 Collection</p>
+                                        <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #1f2937;"><code style="background: #e5e7eb; padding: 0.2rem 0.5rem; border-radius: 4px;">{source_collection}</code></p>
+                                    </div>
+                                    <div>
+                                        <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">📄 Document</p>
+                                        <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #1f2937;"><code style="background: #e5e7eb; padding: 0.2rem 0.5rem; border-radius: 4px;">{source_file}</code></p>
+                                    </div>
+                                    {f'<div><p style="margin: 0; font-size: 0.8rem; color: #6b7280;">📍 Chunk ID</p><p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #1f2937;">{chunk_id}</p></div>' if chunk_id != "N/A" else ''}
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            st.markdown("**📝 Content Preview:**")
+                            st.markdown(f"""
+                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #e5e7eb; font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.6; color: #374151;">
+                                {source["content"][:500] + ("..." if len(source["content"]) > 500 else "")}
+                            </div>
+                            """, unsafe_allow_html=True)
+                            with st.expander("🔍 View Full Metadata"):
                                 st.json(source_metadata)
                             if i < len(message["sources"]):
-                                st.markdown("---")
+                                st.markdown("<hr style='margin: 1.5rem 0; border: none; border-top: 2px solid #e5e7eb;'>", unsafe_allow_html=True)
     
     # Show message if no documents uploaded
     if not st.session_state.chat_history:
@@ -459,15 +816,23 @@ with tab1:
 
 # Tab 2: Analytics Dashboard
 with tab2:
-    st.header("📊 Analytics Dashboard")
+    st.markdown("""
+    <div style="margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">📊 Analytics Dashboard</h2>
+        <p style="color: #6b7280; margin: 0;">Track performance metrics and system insights</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Metric view selector
+    # Metric view selector with better styling
+    st.markdown("### 📈 Metrics View")
     metric_view = st.radio(
         "Select Metrics View",
         ["My Metrics", "Overall Metrics"],
         horizontal=True,
-        help="View your personal metrics or aggregate metrics across all users"
+        help="View your personal metrics or aggregate metrics across all users",
+        label_visibility="collapsed"
     )
+    st.markdown("---")
     
     collection = st.session_state.collection_manager.get_current_collection()
     collection_info = collection.get_collection_info()
@@ -478,22 +843,46 @@ with tab2:
         eval_summary = evaluator.get_summary()
         st.caption(f"👤 User ID: {user_id[:8]}...")
         
-        # Overview Metrics
+        # Overview Metrics with enhanced styling
+        st.markdown("### 📊 Key Performance Indicators")
         col1, col2, col3, col4 = st.columns(4)
         
+        doc_count = collection_info.get("document_count", 0)
+        query_count = eval_summary.get("total_queries", 0)
+        avg_rel = eval_summary.get("avg_relevance", 0.0)
+        avg_qual = eval_summary.get("avg_quality", 0.0)
+        
         with col1:
-            st.metric("📚 Total Documents", collection_info.get("document_count", 0))
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #93c5fd; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);">
+                <p style="margin: 0; font-size: 0.85rem; color: #1e40af; font-weight: 600;">📚 Total Documents</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1e3a8a;">{doc_count}</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         with col2:
-            st.metric("💬 Total Queries", eval_summary.get("total_queries", 0))
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #a5b4fc; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.1);">
+                <p style="margin: 0; font-size: 0.85rem; color: #4338ca; font-weight: 600;">💬 Total Queries</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #3730a3;">{query_count}</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         with col3:
-            avg_rel = eval_summary.get("avg_relevance", 0.0)
-            st.metric("⭐ Avg Relevance", f"{avg_rel:.1%}")
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #fcd34d; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.1);">
+                <p style="margin: 0; font-size: 0.85rem; color: #92400e; font-weight: 600;">⭐ Avg Relevance</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #78350f;">{avg_rel:.1%}</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         with col4:
-            avg_qual = eval_summary.get("avg_quality", 0.0)
-            st.metric("🎯 Avg Quality", f"{avg_qual:.1%}")
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #6ee7b7; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.1);">
+                <p style="margin: 0; font-size: 0.85rem; color: #065f46; font-weight: 600;">🎯 Avg Quality</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #047857;">{avg_qual:.1%}</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.markdown("---")
         
@@ -692,7 +1081,12 @@ with tab2:
 
 # Tab 3: Collections Management
 with tab3:
-    st.header("📁 Document Collections")
+    st.markdown("""
+    <div style="margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">📁 Document Collections</h2>
+        <p style="color: #6b7280; margin: 0;">Organize and manage your document collections</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     manager = st.session_state.collection_manager
     
@@ -780,7 +1174,12 @@ with tab3:
 
 # Tab 4: Document Management
 with tab4:
-    st.header("📄 Document Management")
+    st.markdown("""
+    <div style="margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">📄 Document Management</h2>
+        <p style="color: #6b7280; margin: 0;">View, manage, and delete indexed documents</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     collection = st.session_state.collection_manager.get_current_collection()
     collection_info = collection.get_collection_info()
@@ -845,7 +1244,12 @@ with tab4:
 
 # Tab 5: Export/Import
 with tab5:
-    st.header("💾 Export & Import")
+    st.markdown("""
+    <div style="margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">💾 Export & Import</h2>
+        <p style="color: #6b7280; margin: 0;">Export your data or import from previous sessions</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
