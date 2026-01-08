@@ -8,20 +8,39 @@ from typing import Optional
 def get_user_id() -> str:
     """
     Get or create a unique user ID for the current session.
-    Uses Streamlit's session ID or generates one from browser info.
+    Uses a combination of session state and browser-based identification.
     """
     if "user_id" not in st.session_state:
-        # Try to get Streamlit's session ID
-        try:
-            session_id = st.runtime.get_instance()._session_mgr.list_sessions()[0].id if hasattr(st.runtime.get_instance(), '_session_mgr') else None
-        except:
-            session_id = None
+        # Try multiple methods to get a stable user identifier
+        user_id = None
         
-        if session_id:
-            # Use session ID as base for user ID
-            user_id = hashlib.md5(session_id.encode()).hexdigest()[:12]
-        else:
-            # Fallback: Generate from user agent or random
+        # Method 1: Try to get Streamlit's session ID (works in some deployments)
+        try:
+            import streamlit.runtime.scriptrunner.script_runner as script_runner
+            if hasattr(script_runner, 'get_script_run_ctx'):
+                ctx = script_runner.get_script_run_ctx()
+                if ctx and hasattr(ctx, 'session_id'):
+                    session_id = ctx.session_id
+                    if session_id:
+                        user_id = hashlib.md5(session_id.encode()).hexdigest()[:12]
+        except:
+            pass
+        
+        # Method 2: Try runtime instance (alternative approach)
+        if not user_id:
+            try:
+                runtime = st.runtime.get_instance()
+                if hasattr(runtime, '_session_mgr'):
+                    sessions = runtime._session_mgr.list_sessions()
+                    if sessions:
+                        session_id = sessions[0].id
+                        if session_id:
+                            user_id = hashlib.md5(session_id.encode()).hexdigest()[:12]
+            except:
+                pass
+        
+        # Method 3: Fallback - generate random ID and store in session
+        if not user_id:
             import secrets
             user_id = secrets.token_hex(6)
         
