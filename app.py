@@ -36,13 +36,26 @@ st.set_page_config(
 try:
     DATA_DIR = Path("./data")
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-except (PermissionError, OSError):
+    # Test write access
+    test_file = DATA_DIR / ".test_write"
+    test_file.write_text("test")
+    test_file.unlink()
+except (PermissionError, OSError, Exception) as e:
     # Cloud environment may not allow file creation
     # Use temporary in-memory storage instead
+    logger.warning(f"File system not writable, using in-memory storage: {e}")
     DATA_DIR = None
 
 # Get or create user ID for this session
-user_id = get_user_id()
+try:
+    user_id = get_user_id()
+except Exception as e:
+    logger.error(f"Error generating user ID: {e}")
+    # Fallback to simple random ID
+    import secrets
+    user_id = secrets.token_hex(6)
+    if "user_id" not in st.session_state:
+        st.session_state.user_id = user_id
 
 # Get user-specific paths
 EVALS_PATH = get_user_evaluations_path(DATA_DIR, user_id) if DATA_DIR else None
