@@ -3,6 +3,7 @@ import hashlib
 import streamlit as st
 from pathlib import Path
 from typing import Optional
+from loguru import logger
 
 
 def get_user_id() -> str:
@@ -11,22 +12,26 @@ def get_user_id() -> str:
     Uses URL query parameters for persistence across sessions.
     """
     # First, check if we have it in session state (fast access)
-    if "user_id" in st.session_state:
+    if "user_id" in st.session_state and st.session_state.get("user_id_persisted", False):
         return st.session_state.user_id
     
-    # Method 1: Check URL query parameters (persists across refreshes)
+    # Method 1: Check URL query parameters FIRST (persists across refreshes)
     user_id = None
     try:
         # Try to get user_id from query parameters
         query_params = st.query_params
         if "user_id" in query_params:
             user_id = query_params["user_id"]
-            # Validate it's a reasonable format (alphanumeric, 12-16 chars)
+            # Validate it's a reasonable format (alphanumeric, 12-24 chars)
             if user_id and user_id.isalnum() and 12 <= len(user_id) <= 24:
                 st.session_state.user_id = user_id
+                st.session_state.user_id_persisted = True
                 return user_id
-    except Exception:
-        pass
+            else:
+                # Invalid format, ignore it and generate new one
+                user_id = None
+    except Exception as e:
+        logger.debug(f"Error reading query params: {e}")
     
     # Method 2: Try to get Streamlit's session ID (for first-time users)
     if not user_id:
@@ -38,7 +43,7 @@ def get_user_id() -> str:
                     session_id = ctx.session_id
                     if session_id:
                         user_id = hashlib.md5(session_id.encode()).hexdigest()[:12]
-        except:
+        except Exception:
             pass
     
     # Method 3: Generate a new random ID
@@ -50,14 +55,18 @@ def get_user_id() -> str:
     st.session_state.user_id = user_id
     
     # Persist to URL query parameters so it survives refresh
-    try:
-        # Only update query params if not already set (avoid infinite redirects)
-        current_params = st.query_params
-        if "user_id" not in current_params or current_params["user_id"] != user_id:
-            st.query_params["user_id"] = user_id
-    except Exception:
-        # If query params update fails, that's okay - session state will work
-        pass
+    # Only do this if not already persisted to avoid infinite reruns
+    if not st.session_state.get("user_id_persisted", False):
+        try:
+            # Check if query params need updating
+            current_params = st.query_params
+            if "user_id" not in current_params or current_params.get("user_id") != user_id:
+                # Use st.query_params.update() which is safer
+                st.query_params.update(user_id=user_id)
+                st.session_state.user_id_persisted = True
+        except Exception as e:
+            # If query params update fails, that's okay - will try again next time
+            logger.debug(f"Could not persist user_id to query params: {e}")
     
     return user_id
 
