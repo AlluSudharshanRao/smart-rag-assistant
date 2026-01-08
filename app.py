@@ -1,6 +1,7 @@
 """Streamlit frontend for the RAG Document Assistant."""
 import os
 import tempfile
+import json
 import streamlit as st
 from pathlib import Path
 
@@ -805,7 +806,6 @@ with tab1:
                             """, unsafe_allow_html=True)
                             
                             # Use HTML details element instead of nested expander
-                            import json
                             metadata_json = json.dumps(source_metadata, indent=2)
                             st.markdown(f"""
                             <details style="margin-top: 0.75rem;">
