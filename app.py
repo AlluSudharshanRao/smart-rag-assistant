@@ -1153,10 +1153,9 @@ with tab3:
     
     # Overall Metrics Section
     if DATA_DIR:
-        if DATA_DIR:
-            overall_metrics = get_overall_metrics(DATA_DIR)
-            
-            st.caption("📊 Aggregate metrics across all users")
+        overall_metrics = get_overall_metrics(DATA_DIR)
+        
+        st.caption("📊 Aggregate metrics across all users")
             
             # Overview Metrics
             col1, col2, col3, col4 = st.columns(4)
@@ -1250,11 +1249,11 @@ with tab3:
                     mime="application/json",
                     use_container_width=True
                 )
-        else:
-            st.warning("⚠️ Overall metrics are not available in cloud deployment (file system access required).")
+    else:
+        st.warning("⚠️ Overall metrics are not available in cloud deployment (file system access required).")
 
-# Tab 3: Collections Management
-with tab3:
+# Tab 4: Collections Management
+with tab4:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
         <h2 style="margin-bottom: 0.5rem;">📁 Document Collections</h2>
