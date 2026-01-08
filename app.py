@@ -372,14 +372,9 @@ except (PermissionError, OSError, Exception) as e:
     DATA_DIR = None
 
 # Get or create persistent user ID (survives page refreshes)
+# get_user_id() handles persistence via URL query parameters automatically
 try:
     user_id = get_user_id()
-    # Ensure it's persisted in query params if not already there
-    try:
-        if "user_id" not in st.query_params or st.query_params["user_id"] != user_id:
-            st.query_params["user_id"] = user_id
-    except Exception:
-        pass  # Query params update may not always work, that's okay
 except Exception as e:
     logger.error(f"Error generating user ID: {e}")
     # Fallback to simple random ID
@@ -389,7 +384,8 @@ except Exception as e:
         st.session_state.user_id = user_id
     # Try to persist fallback ID too
     try:
-        st.query_params["user_id"] = user_id
+        if "user_id" not in st.query_params or st.query_params.get("user_id") != user_id:
+            st.query_params.update(user_id=user_id)
     except Exception:
         pass
 
