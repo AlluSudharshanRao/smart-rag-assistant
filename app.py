@@ -483,8 +483,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Create tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "💬 Chat", 
+    "👤 Profile",
     "📊 Analytics", 
     "📁 Collections", 
     "📄 Documents", 
@@ -892,256 +893,266 @@ with tab1:
             4. **Switch Collections** to query different document sets
             """)
 
-# Tab 2: Analytics Dashboard
+# Tab 2: User Profile
 with tab2:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
-        <h2 style="margin-bottom: 0.5rem;">📊 Analytics Dashboard</h2>
-        <p style="color: #6b7280; margin: 0;">Track performance metrics and system insights</p>
+        <h2 style="margin-bottom: 0.5rem;">👤 My Profile</h2>
+        <p style="color: #6b7280; margin: 0;">Your personal dashboard and performance insights</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Metric view selector with better styling
-    st.markdown("### 📈 Metrics View")
-    metric_view = st.radio(
-        "Select Metrics View",
-        ["My Metrics", "Overall Metrics"],
-        horizontal=True,
-        help="View your personal metrics or aggregate metrics across all users",
-        label_visibility="collapsed"
-    )
+    # User Info Section
+    st.markdown("### 👤 Profile Information")
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.markdown(f"""
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 1.5rem;">
+            <p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-weight: 600;">User ID</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 1.2rem; font-weight: 700; color: #1f2937; font-family: monospace;">{user_id}</p>
+            <p style="margin: 0.75rem 0 0 0; font-size: 0.85rem; color: #9ca3af;">Your unique identifier for this session</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        # Calculate session stats
+        total_queries = len(st.session_state.chat_history) // 2 if st.session_state.chat_history else 0
+        total_collections = len(st.session_state.collections_list) if hasattr(st.session_state, 'collections_list') else 0
+        st.markdown(f"""
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; border: 1px solid #e5e7eb; text-align: center;">
+            <p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-weight: 600;">Session Activity</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{total_queries}</p>
+            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #9ca3af;">Queries</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("---")
     
+    # Personal Metrics Section
+    evaluator = st.session_state.evaluator
+    eval_summary = evaluator.get_summary()
     collection = st.session_state.collection_manager.get_current_collection()
     collection_info = collection.get_collection_info()
     
-    # Display metrics based on selection
-    if metric_view == "My Metrics":
-        evaluator = st.session_state.evaluator
-        eval_summary = evaluator.get_summary()
-        st.caption(f"👤 User ID: {user_id[:8]}...")
+    st.markdown("### 📊 My Performance Metrics")
+    
+    # Key Metrics Cards
+    col1, col2, col3, col4 = st.columns(4)
+    
+    doc_count = collection_info.get("document_count", 0)
+    query_count = eval_summary.get("total_queries", 0)
+    avg_rel = eval_summary.get("avg_relevance", 0.0)
+    avg_qual = eval_summary.get("avg_quality", 0.0)
+    
+    with col1:
+        st.markdown(f"""
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">📚 Documents</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1f2937;">{doc_count}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">💬 Queries</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1f2937;">{query_count}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">⭐ Relevance</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1f2937;">{avg_rel:.1%}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown(f"""
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🎯 Quality</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1f2937;">{avg_qual:.1%}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # RAGAS Metrics if available
+    avg_faith = eval_summary.get("avg_faithfulness", 0.0)
+    avg_ans_rel = eval_summary.get("avg_answer_relevancy", 0.0)
+    avg_ctx_prec = eval_summary.get("avg_context_precision", 0.0)
+    avg_ctx_rec = eval_summary.get("avg_context_recall", 0.0)
+    
+    if avg_faith > 0 or avg_ans_rel > 0 or avg_ctx_prec > 0 or avg_ctx_rec > 0:
+        st.markdown("### 🎯 My RAGAS Evaluation Metrics")
+        st.info("📊 **RAGAS** (Retrieval Augmented Generation Assessment) metrics for your queries")
         
-        # Overview Metrics with enhanced styling
-        st.markdown("### 📊 Key Performance Indicators")
         col1, col2, col3, col4 = st.columns(4)
-        
-        doc_count = collection_info.get("document_count", 0)
-        query_count = eval_summary.get("total_queries", 0)
-        avg_rel = eval_summary.get("avg_relevance", 0.0)
-        avg_qual = eval_summary.get("avg_quality", 0.0)
         
         with col1:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #93c5fd; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);">
-                <p style="margin: 0; font-size: 0.85rem; color: #1e40af; font-weight: 600;">📚 Total Documents</p>
-                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1e3a8a;">{doc_count}</p>
+            <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">✓ Faithfulness</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{avg_faith:.1%}</p>
+                <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Grounded in context</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #a5b4fc; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.1);">
-                <p style="margin: 0; font-size: 0.85rem; color: #4338ca; font-weight: 600;">💬 Total Queries</p>
-                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #3730a3;">{query_count}</p>
+            <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🎯 Answer Relevancy</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{avg_ans_rel:.1%}</p>
+                <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Addresses question</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col3:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #fcd34d; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.1);">
-                <p style="margin: 0; font-size: 0.85rem; color: #92400e; font-weight: 600;">⭐ Avg Relevance</p>
-                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #78350f;">{avg_rel:.1%}</p>
+            <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">📍 Context Precision</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{avg_ctx_prec:.1%}</p>
+                <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Retrieval precision</p>
             </div>
             """, unsafe_allow_html=True)
         
         with col4:
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #6ee7b7; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.1);">
-                <p style="margin: 0; font-size: 0.85rem; color: #065f46; font-weight: 600;">🎯 Avg Quality</p>
-                <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #047857;">{avg_qual:.1%}</p>
+            <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🔍 Context Recall</p>
+                <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{avg_ctx_rec:.1%}</p>
+                <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Retrieval recall</p>
             </div>
             """, unsafe_allow_html=True)
         
         st.markdown("---")
-        
-        # Usage Statistics with enhanced cards
-        st.markdown("### 📈 Usage Statistics")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            col_name_val = collection_info.get('name', 'N/A')
-            doc_count_val = collection_info.get('document_count', 0)
-            storage_val = collection_info.get('persist_directory', 'N/A')
+    
+    # Usage Statistics
+    st.markdown("### 📈 Usage Statistics")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        col_name_val = collection_info.get('name', 'N/A')
+        doc_count_val = collection_info.get('document_count', 0)
+        storage_val = collection_info.get('persist_directory', 'N/A')
+        st.markdown(f"""
+        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; border-left: 5px solid #6b7280; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+            <h4 style="margin: 0 0 1rem 0; color: #374151;">📊 Collection Stats</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div>
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Collection Name</p>
+                    <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #374151;"><code style="background: white; padding: 0.3rem 0.6rem; border-radius: 4px;">{col_name_val}</code></p>
+                </div>
+                <div>
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Document Count</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1.5rem; font-weight: 700; color: #374151;">{doc_count_val}</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        if eval_summary.get("total_queries", 0) > 0:
+            avg_rt = eval_summary.get("avg_response_time", 0.0)
+            rt_text = f"{avg_rt:.2f}s" if avg_rt > 0 else "N/A"
+            total_queries_val = eval_summary.get('total_queries', 0)
+            avg_relevance_val = eval_summary.get('avg_relevance', 0.0)
+            avg_quality_val = eval_summary.get('avg_quality', 0.0)
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1.5rem; border-radius: 12px; border-left: 5px solid #0ea5e9; box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);">
-                <h4 style="margin: 0 0 1rem 0; color: #0c4a6e;">📊 Collection Stats</h4>
+            <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; border-left: 5px solid #6b7280; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+                <h4 style="margin: 0 0 1rem 0; color: #374151;">⚡ Query Performance</h4>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     <div>
-                        <p style="margin: 0; font-size: 0.85rem; color: #075985;">Collection Name</p>
-                        <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #0c4a6e;"><code style="background: white; padding: 0.3rem 0.6rem; border-radius: 4px;">{col_name_val}</code></p>
+                        <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Total Queries</p>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 1.5rem; font-weight: 700; color: #374151;">{total_queries_val}</p>
                     </div>
                     <div>
-                        <p style="margin: 0; font-size: 0.85rem; color: #075985;">Document Count</p>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 1.5rem; font-weight: 700; color: #0c4a6e;">{doc_count_val}</p>
-                    </div>
-                    <div>
-                        <p style="margin: 0; font-size: 0.85rem; color: #075985;">Storage</p>
-                        <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #0c4a6e; font-size: 0.9rem;">{storage_val}</p>
+                        <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Avg Response Time</p>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #374151;">{rt_text}</p>
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
+        else:
+            st.info("No query data available yet. Start asking questions to see your performance metrics!")
+    
+    st.markdown("---")
+    
+    # Recent Query History
+    if st.session_state.chat_history:
+        st.markdown("### 💬 Recent Query History")
+        recent_queries = [msg for msg in st.session_state.chat_history if msg["role"] == "user"][-5:]
         
-        with col2:
-            if eval_summary.get("total_queries", 0) > 0:
-                avg_rt = eval_summary.get("avg_response_time", 0.0)
-                rt_text = f"{avg_rt:.2f}s" if avg_rt > 0 else "N/A"
-                total_queries_val = eval_summary.get('total_queries', 0)
-                avg_relevance_val = eval_summary.get('avg_relevance', 0.0)
-                avg_quality_val = eval_summary.get('avg_quality', 0.0)
+        if recent_queries:
+            for i, query_msg in enumerate(reversed(recent_queries), 1):
+                query_text = query_msg["content"]
                 st.markdown(f"""
-                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 1.5rem; border-radius: 12px; border-left: 5px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);">
-                    <h4 style="margin: 0 0 1rem 0; color: #065f46;">⚡ Query Performance</h4>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <div>
-                            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Total Queries</p>
-                            <p style="margin: 0.25rem 0 0 0; font-size: 1.5rem; font-weight: 700; color: #065f46;">{total_queries_val}</p>
-                        </div>
-                        <div>
-                            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Average Relevance</p>
-                            <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #065f46;">{avg_relevance_val:.1%}</p>
-                        </div>
-                        <div>
-                            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Average Quality</p>
-                            <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #065f46;">{avg_quality_val:.1%}</p>
-                        </div>
-                        <div>
-                            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Avg Response Time</p>
-                            <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #065f46;">{rt_text}</p>
-                        </div>
-                    </div>
+                <div style="background: #f9fafb; padding: 1rem; border-radius: 8px; border-left: 3px solid #6b7280; margin-bottom: 0.75rem;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #374151; font-weight: 600;">Query #{len(recent_queries) - i + 1}</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.95rem; color: #1f2937;">{query_text[:150]}{'...' if len(query_text) > 150 else ''}</p>
                 </div>
                 """, unsafe_allow_html=True)
-            else:
-                st.markdown("""
-                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; border-left: 5px solid #9ca3af; text-align: center;">
-                    <p style="margin: 0; color: #6b7280;">No queries yet. Start chatting to see statistics!</p>
-                </div>
-                """, unsafe_allow_html=True)
+        else:
+            st.info("No recent queries. Your query history will appear here.")
+    else:
+        st.info("No query history yet. Start asking questions to build your profile!")
+    
+    st.markdown("---")
+    
+    # Export Profile Data
+    if query_count > 0:
+        st.markdown("### 💾 Export Profile Data")
+        import json
+        import datetime
         
-        st.markdown("---")
-        
-        # Metrics Summary Section
-        st.markdown("### 📄 Standard Metrics Summary")
-        metrics_data = {
-            "Documents Processed": collection_info.get("document_count", 0),
-            "Total Queries": eval_summary.get("total_queries", 0),
-            "Avg Relevance": f"{eval_summary.get('avg_relevance', 0.0):.1%}",
-            "Avg Quality": f"{eval_summary.get('avg_quality', 0.0):.1%}",
-            "Avg Response Time": f"{eval_summary.get('avg_response_time', 0.0):.2f}s" if eval_summary.get('avg_response_time', 0.0) > 0 else "N/A",
-            "Collections": len(st.session_state.collections_list),
+        profile_data = {
+            "user_id": user_id,
+            "profile_export_date": datetime.datetime.now().isoformat(),
+            "metrics": {
+                "total_queries": query_count,
+                "documents_processed": doc_count,
+                "avg_relevance": avg_rel,
+                "avg_quality": avg_qual,
+                "avg_response_time": eval_summary.get("avg_response_time", 0.0),
+                "faithfulness": avg_faith,
+                "answer_relevancy": avg_ans_rel,
+                "context_precision": avg_ctx_prec,
+                "context_recall": avg_ctx_rec,
+            },
+            "collection_info": {
+                "current_collection": collection_info.get("name", "N/A"),
+                "document_count": doc_count,
+            },
+            "recent_queries": [msg["content"] for msg in st.session_state.chat_history if msg["role"] == "user"][-10:],
         }
         
-        # Display metrics in a nice format
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("**Key Metrics:**")
-            for key, value in list(metrics_data.items())[:3]:
-                st.write(f"- **{key}:** {value}")
-        with col2:
-            st.markdown("**Additional Metrics:**")
-            for key, value in list(metrics_data.items())[3:]:
-                st.write(f"- **{key}:** {value}")
-        
-        # RAGAS Metrics Section
-        if eval_summary.get("avg_faithfulness", 0.0) > 0 or eval_summary.get("avg_answer_relevancy", 0.0) > 0:
-            st.markdown("---")
-            st.markdown("### 🎯 RAGAS Metrics (Industry Standard Evaluation)")
-            st.info("📊 **RAGAS** (Retrieval Augmented Generation Assessment) metrics provide industry-standard evaluation of RAG systems.")
-            
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                st.markdown(f"""
-                <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">✓ Faithfulness</p>
-                    <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{eval_summary.get('avg_faithfulness', 0.0):.1%}</p>
-                    <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Answer grounded in context</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col2:
-                st.markdown(f"""
-                <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🎯 Answer Relevancy</p>
-                    <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{eval_summary.get('avg_answer_relevancy', 0.0):.1%}</p>
-                    <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Answer addresses question</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col3:
-                st.markdown(f"""
-                <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">📍 Context Precision</p>
-                    <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{eval_summary.get('avg_context_precision', 0.0):.1%}</p>
-                    <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Retrieval precision</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col4:
-                st.markdown(f"""
-                <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🔍 Context Recall</p>
-                    <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{eval_summary.get('avg_context_recall', 0.0):.1%}</p>
-                    <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Retrieval recall</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            st.caption("💡 These metrics follow industry-standard RAGAS evaluation framework for comprehensive RAG system assessment.")
-        
-        # Download Metrics
-        if collection_info.get("document_count", 0) > 0 and eval_summary.get("total_queries", 0) > 0:
-            st.markdown("---")
-            import json
-            metrics_export = {
-                "metrics": metrics_data,
-                "user_id": user_id,
-                "generated_date": str(__import__("datetime").datetime.now()),
-            }
-            metrics_json = json.dumps(metrics_export, indent=2)
-            st.download_button(
-                "📥 Download My Metrics (JSON)",
-                metrics_json,
-                file_name=f"my_metrics_{__import__('datetime').datetime.now().strftime('%Y%m%d')}.json",
-                mime="application/json",
-                use_container_width=True
-            )
-        else:
-            st.info("📊 Process some documents and ask questions to generate metrics!")
-        
-        st.markdown("---")
-        
-        # Query History (Last 10) - User-specific
-        if evaluator.results:
-            st.subheader("📋 My Recent Query History")
-            recent_results = evaluator.results[-10:]
-            
-            for i, result in enumerate(reversed(recent_results), 1):
-                with st.expander(f"Query {i}: {result.question[:60]}..."):
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        st.metric("Relevance", f"{result.relevance_score:.1%}")
-                    with col2:
-                        st.metric("Quality", f"{result.answer_quality:.1%}")
-                    with col3:
-                        st.metric("Docs Retrieved", result.retrieved_docs)
-                    with col4:
-                        if hasattr(result, 'response_time') and result.response_time > 0:
-                            st.metric("Response Time", f"{result.response_time:.2f}s")
-                    st.caption(f"**Answer:** {result.actual_answer[:200]}...")
+        profile_json = json.dumps(profile_data, indent=2)
+        st.download_button(
+            "📥 Download My Profile (JSON)",
+            profile_json,
+            file_name=f"my_profile_{datetime.datetime.now().strftime('%Y%m%d')}.json",
+            mime="application/json",
+            use_container_width=True,
+            help="Download your complete profile data including metrics and recent queries"
+        )
+
+# Tab 3: Analytics Dashboard (Overall Metrics Only)
+with tab3:
+    st.markdown("""
+    <div style="margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">📊 Analytics Dashboard</h2>
+        <p style="color: #6b7280; margin: 0;">System-wide metrics and aggregate insights across all users</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    else:  # Overall Metrics
+    st.info("💡 **Note:** For your personal metrics, check the **👤 Profile** tab. This dashboard shows aggregate metrics across all users.")
+    st.markdown("---")
+    
+    # Overall Metrics Section
+    if DATA_DIR:
         if DATA_DIR:
             overall_metrics = get_overall_metrics(DATA_DIR)
             
@@ -1335,8 +1346,8 @@ with tab3:
         else:
             st.warning("⚠️ Please enter a collection name")
 
-# Tab 4: Document Management
-with tab4:
+# Tab 5: Document Management
+with tab5:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
         <h2 style="margin-bottom: 0.5rem;">📄 Document Management</h2>
@@ -1405,8 +1416,8 @@ with tab4:
         st.error(f"❌ Error loading documents: {str(e)}")
         st.info("💡 Try uploading a document first!")
 
-# Tab 5: Export/Import
-with tab5:
+# Tab 6: Export/Import
+with tab6:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
         <h2 style="margin-bottom: 0.5rem;">💾 Export & Import</h2>
