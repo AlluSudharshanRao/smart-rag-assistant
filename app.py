@@ -803,8 +803,18 @@ with tab1:
                                 {source["content"][:500] + ("..." if len(source["content"]) > 500 else "")}
                             </div>
                             """, unsafe_allow_html=True)
-                            with st.expander("🔍 View Full Metadata"):
-                                st.json(source_metadata)
+                            
+                            # Use HTML details element instead of nested expander
+                            import json
+                            metadata_json = json.dumps(source_metadata, indent=2)
+                            st.markdown(f"""
+                            <details style="margin-top: 0.75rem;">
+                                <summary style="cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.5rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">🔍 View Full Metadata</summary>
+                                <div style="margin-top: 0.5rem; padding: 1rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; overflow-x: auto;">
+                                    <pre style="margin: 0; font-size: 0.85rem; color: #374151; white-space: pre-wrap; word-wrap: break-word;">{metadata_json}</pre>
+                                </div>
+                            </details>
+                            """, unsafe_allow_html=True)
                             if i < len(message["sources"]):
                                 st.markdown("<hr style='margin: 1.5rem 0; border: none; border-top: 2px solid #e5e7eb;'>", unsafe_allow_html=True)
     
