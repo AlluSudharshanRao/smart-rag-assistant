@@ -46,31 +46,20 @@ st.markdown("""
         max-width: 1400px;
     }
     
-    /* Header styling - More vibrant */
+    /* Header styling - Neutral colors */
     h1 {
-        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 15%, #ec4899 30%, #8b5cf6 45%, #6366f1 60%, #06b6d4 75%, #10b981 90%, #f59e0b 100%);
-        background-size: 200% 200%;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        animation: gradientShift 5s ease infinite;
-        font-size: 3rem;
-        font-weight: 800;
+        color: #1f2937;
+        font-size: 2.5rem;
+        font-weight: 700;
         margin-bottom: 0.5rem;
-        text-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
     }
     
     h2 {
-        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 25%, #ec4899 50%, #8b5cf6 75%, #6366f1 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-weight: 700;
-        font-size: 2rem;
+        color: #374151;
+        font-weight: 600;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
-        border-left: 5px solid;
-        border-image: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #6366f1) 1;
+        border-left: 4px solid #6b7280;
         padding-left: 1rem;
     }
     
@@ -80,143 +69,103 @@ st.markdown("""
         margin-top: 1rem;
     }
     
-    /* Sidebar styling - More colorful */
+    /* Sidebar styling - Neutral colors */
     .css-1d391kg {
-        background: linear-gradient(180deg, #fef3c7 0%, #fde68a 15%, #e0e7ff 30%, #ddd6fe 45%, #f0e68c 60%, #dbeafe 75%, #e0e7ff 90%, #fef3c7 100%);
-        background-size: 100% 200%;
+        background: #ffffff;
     }
     
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #fef3c7 0%, #fde68a 15%, #e0e7ff 30%, #ddd6fe 45%, #f0e68c 60%, #dbeafe 75%, #e0e7ff 90%, #fef3c7 100%);
-        background-size: 100% 200%;
-        animation: gradientShift 8s ease infinite;
-        box-shadow: 4px 0 20px rgba(139, 92, 246, 0.15);
+        background: #ffffff;
+        border-right: 1px solid #e5e7eb;
     }
     
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
         color: #1f2937;
     }
     
-    /* Button styling - More colorful */
+    /* Button styling - Neutral colors */
     .stButton > button {
-        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 25%, #ec4899 50%, #8b5cf6 75%, #6366f1 100%);
-        background-size: 200% 200%;
-        animation: gradientShift 3s ease infinite;
+        background: #374151;
         color: white;
         border: none;
-        border-radius: 10px;
-        padding: 0.75rem 2rem;
-        font-weight: 700;
-        font-size: 1rem;
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
         transition: all 0.3s ease;
-        box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .stButton > button:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.6);
-        animation: gradientShift 1s ease infinite;
-    }
-    
-    @keyframes gradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    
-    /* Metric cards - More colorful */
-    [data-testid="stMetricValue"] {
-        font-size: 2.2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 25%, #ec4899 50%, #8b5cf6 75%, #6366f1 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    [data-testid="stMetricLabel"] {
-        font-size: 1rem;
-        background: linear-gradient(135deg, #f59e0b 0%, #8b5cf6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-weight: 600;
-    }
-    
-    /* Info boxes - More vibrant colors */
-    .stInfo {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 25%, #ddd6fe 50%, #e0e7ff 75%, #dbeafe 100%);
-        background-size: 200% 200%;
-        animation: gradientShift 4s ease infinite;
-        border-left: 5px solid;
-        border-image: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6) 1;
-        border-radius: 12px;
-        padding: 1.25rem;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-    }
-    
-    .stSuccess {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 25%, #86efac 50%, #6ee7b7 75%, #d1fae5 100%);
-        background-size: 200% 200%;
-        animation: gradientShift 4s ease infinite;
-        border-left: 5px solid;
-        border-image: linear-gradient(135deg, #10b981, #059669, #047857) 1;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-    }
-    
-    .stWarning {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 25%, #fcd34d 50%, #fbbf24 75%, #fef3c7 100%);
-        background-size: 200% 200%;
-        animation: gradientShift 4s ease infinite;
-        border-left: 5px solid;
-        border-image: linear-gradient(135deg, #f59e0b, #d97706, #b45309) 1;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
-    }
-    
-    .stError {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 25%, #fca5a5 50%, #f87171 75%, #fee2e2 100%);
-        background-size: 200% 200%;
-        animation: gradientShift 4s ease infinite;
-        border-left: 5px solid;
-        border-image: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c) 1;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-    }
-    
-    /* Tabs styling - Bigger and more colorful */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 20%, #e0e7ff 40%, #ddd6fe 60%, #f0e68c 80%, #fef3c7 100%);
-        padding: 1rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 10px;
-        padding: 1.25rem 2rem;
-        font-weight: 700;
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-        background: rgba(255, 255, 255, 0.7);
-        color: #374151;
-    }
-    
-    .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(255, 255, 255, 0.9);
-        transform: translateY(-2px);
+        background: #4b5563;
+        transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
     
+    /* Metric cards - Neutral colors */
+    [data-testid="stMetricValue"] {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    
+    /* Info boxes - Neutral colors */
+    .stInfo {
+        background: #f3f4f6;
+        border-left: 4px solid #6b7280;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .stSuccess {
+        background: #f0fdf4;
+        border-left: 4px solid #059669;
+        border-radius: 8px;
+    }
+    
+    .stWarning {
+        background: #fffbeb;
+        border-left: 4px solid #d97706;
+        border-radius: 8px;
+    }
+    
+    .stError {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        border-radius: 8px;
+    }
+    
+    /* Tabs styling - Neutral colors */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: #f9fafb;
+        padding: 0.5rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #6b7280;
+        background: transparent;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: #f3f4f6;
+        color: #374151;
+    }
+    
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 25%, #ec4899 50%, #8b5cf6 75%, #6366f1 100%);
+        background: #374151;
         color: white;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-        transform: translateY(-2px);
     }
     
     /* Expander styling */
@@ -233,48 +182,41 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     
-    /* Input styling */
+    /* Input styling - Neutral colors */
     .stTextInput > div > div > input {
         border-radius: 8px;
-        border: 2px solid #e5e7eb;
+        border: 1px solid #d1d5db;
         transition: all 0.3s ease;
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #6b7280;
+        box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
     }
     
-    /* Selectbox styling - More colorful */
+    /* Selectbox styling - Neutral colors */
     .stSelectbox > div > div {
-        border-radius: 10px;
-        border: 2px solid;
-        border-image: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6) 1;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-        font-weight: 600;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
     }
     
-    /* File uploader styling - More colorful */
+    /* File uploader styling - Neutral colors */
     [data-testid="stFileUploader"] {
-        border: 3px dashed;
-        border-image: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #6366f1) 1;
-        border-radius: 15px;
-        padding: 2.5rem;
-        background: linear-gradient(135deg, rgba(254, 243, 199, 0.3) 0%, rgba(232, 232, 255, 0.3) 50%, rgba(254, 243, 199, 0.3) 100%);
+        border: 2px dashed #d1d5db;
+        border-radius: 12px;
+        padding: 2rem;
+        background: #f9fafb;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
     }
     
     [data-testid="stFileUploader"]:hover {
-        border-image: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #6366f1) 1;
-        background: linear-gradient(135deg, rgba(254, 243, 199, 0.5) 0%, rgba(232, 232, 255, 0.5) 50%, rgba(254, 243, 199, 0.5) 100%);
-        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
-        transform: translateY(-2px);
+        border-color: #9ca3af;
+        background: #f3f4f6;
     }
     
-    /* Progress bar */
+    /* Progress bar - Neutral colors */
     .stProgress > div > div > div {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: #374151;
     }
     
     /* Code blocks */
@@ -313,76 +255,63 @@ st.markdown("""
         transform: translateY(-2px);
     }
     
-    /* Badge styling */
+    /* Badge styling - Neutral colors */
     .badge {
         display: inline-block;
         padding: 0.25rem 0.75rem;
         border-radius: 12px;
         font-size: 0.75rem;
         font-weight: 600;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #374151;
         color: white;
     }
     
-    /* Custom scrollbar */
+    /* Custom scrollbar - Neutral colors */
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
     }
     
     ::-webkit-scrollbar-track {
-        background: #f1f5f9;
+        background: #f9fafb;
         border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #9ca3af;
         border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        background: #6b7280;
     }
     
-    /* Radio button styling - More colorful */
+    /* Radio button styling - Neutral colors */
     .stRadio > div {
         gap: 1rem;
     }
     
     .stRadio > div > label {
-        padding: 1rem 2rem;
-        border-radius: 12px;
-        border: 3px solid;
-        border-image: linear-gradient(135deg, #f59e0b, #8b5cf6, #6366f1) 1;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
         transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.7);
-        font-weight: 600;
-        font-size: 1rem;
     }
     
     .stRadio > div > label:hover {
-        background: linear-gradient(135deg, rgba(254, 243, 199, 0.5) 0%, rgba(232, 232, 255, 0.5) 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        border-color: #9ca3af;
+        background: #f9fafb;
     }
     
-    .stRadio > div > [data-baseweb="radio"] > div > div {
-        background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6);
-    }
-    
-    /* Download button - More colorful */
+    /* Download button - Neutral colors */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, #10b981 0%, #059669 25%, #06b6d4 50%, #0891b2 75%, #10b981 100%);
-        background-size: 200% 200%;
-        animation: gradientShift 3s ease infinite;
-        box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
-        font-weight: 700;
-        font-size: 1rem;
+        background: #374151;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .stDownloadButton > button:hover {
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.6);
-        transform: translateY(-2px) scale(1.05);
+        background: #4b5563;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
     
     /* Sidebar header */
@@ -398,9 +327,9 @@ st.markdown("""
         font-size: 0.85rem;
     }
     
-    /* Spinner styling */
+    /* Spinner styling - Neutral colors */
     .stSpinner > div {
-        border-color: #667eea;
+        border-color: #6b7280;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -528,17 +457,10 @@ def process_uploaded_file(uploaded_file, collection_name: str = None):
 
 # UI Layout with tabs
 st.markdown("""
-<div style="text-align: center; padding: 2.5rem 0 1.5rem 0; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 10%, #e0e7ff 25%, #ddd6fe 40%, #f0e68c 55%, #dbeafe 70%, #e0e7ff 85%, #fef3c7 100%); background-size: 200% 200%; animation: gradientShift 8s ease infinite; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2); border: 3px solid rgba(255, 255, 255, 0.5);">
-    <h1 style="margin-bottom: 0.5rem; font-size: 3.2rem; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 15%, #ec4899 30%, #8b5cf6 45%, #6366f1 60%, #06b6d4 75%, #10b981 90%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; background-size: 200% 200%; animation: gradientShift 5s ease infinite; font-weight: 800;">📚 Smart RAG Document Assistant</h1>
-    <p style="font-size: 1.25rem; background: linear-gradient(135deg, #f59e0b 0%, #8b5cf6 50%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0.5rem 0 0 0; font-weight: 600;">AI-Powered Document Intelligence • Ask Questions, Get Instant Answers</p>
+<div style="text-align: center; padding: 2rem 0 1.5rem 0; background: #f9fafb; border-radius: 16px; margin-bottom: 2rem; border: 1px solid #e5e7eb;">
+    <h1 style="margin-bottom: 0.5rem; font-size: 2.8rem; color: #1f2937;">📚 Smart RAG Document Assistant</h1>
+    <p style="font-size: 1.15rem; color: #6b7280; margin: 0; font-weight: 500;">AI-Powered Document Intelligence • Ask Questions, Get Instant Answers</p>
 </div>
-<style>
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-</style>
 """, unsafe_allow_html=True)
 
 # Create tabs
@@ -817,18 +739,18 @@ with tab1:
     
     if doc_count > 0:
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 5px solid #3b82f6; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);">
+        <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 5px solid #6b7280; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
                 <div>
-                    <p style="margin: 0; font-size: 0.9rem; color: #1e40af; font-weight: 600;">📁 ACTIVE COLLECTION</p>
-                    <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #1e3a8a;">{st.session_state.current_collection}</p>
+                    <p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-weight: 600;">📁 ACTIVE COLLECTION</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #1f2937;">{st.session_state.current_collection}</p>
                 </div>
                 <div style="flex: 1; min-width: 200px;">
-                    <p style="margin: 0; font-size: 0.9rem; color: #1e40af; font-weight: 600;">📄 DOCUMENTS INDEXED</p>
-                    <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #1e3a8a;">{doc_count}</p>
+                    <p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-weight: 600;">📄 DOCUMENTS INDEXED</p>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #1f2937;">{doc_count}</p>
                 </div>
                 <div>
-                    <p style="margin: 0; font-size: 0.85rem; color: #3b82f6;">💡 All queries will search this collection</p>
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">💡 All queries will search this collection</p>
                 </div>
             </div>
         </div>
