@@ -128,10 +128,6 @@ See `deployment/` directory for cloud-specific instructions.
 
 Contributions welcome! Please read CONTRIBUTING.md first.
 
-## 📝 License
-
-MIT License - feel free to use this project for portfolios and use cases.
-
 ## 🔗 Live Demo
 
 [Add deployed link here]
