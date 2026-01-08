@@ -1156,99 +1156,99 @@ with tab3:
         overall_metrics = get_overall_metrics(DATA_DIR)
         
         st.caption("📊 Aggregate metrics across all users")
-            
-            # Overview Metrics
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                st.metric("👥 Total Users", overall_metrics.get("total_users", 0))
-            
-            with col2:
-                st.metric("💬 Total Queries", overall_metrics.get("total_queries", 0))
-            
-            with col3:
-                avg_rel = overall_metrics.get("avg_relevance", 0.0)
-                st.metric("⭐ Avg Relevance", f"{avg_rel:.1%}")
-            
-            with col4:
-                avg_qual = overall_metrics.get("avg_quality", 0.0)
-                st.metric("🎯 Avg Quality", f"{avg_qual:.1%}")
-            
-            st.markdown("---")
-            
-            # Overall Statistics
-            st.subheader("📈 Overall System Statistics")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown("### System Performance")
-                if overall_metrics.get("total_queries", 0) > 0:
-                    avg_rt = overall_metrics.get("avg_response_time", 0.0)
-                    rt_text = f"{avg_rt:.2f}s" if avg_rt > 0 else "N/A"
-                    st.info(
-                        f"**Total Active Users:** {overall_metrics.get('total_users', 0)}\n\n"
-                        f"**Total Queries (All Users):** {overall_metrics.get('total_queries', 0)}\n\n"
-                        f"**Average Relevance:** {overall_metrics.get('avg_relevance', 0.0):.1%}\n\n"
-                        f"**Average Quality:** {overall_metrics.get('avg_quality', 0.0):.1%}\n\n"
-                        f"**Avg Response Time:** {rt_text}"
-                    )
-                else:
-                    st.info("No system-wide queries yet.")
-            
-            with col2:
-                st.markdown("### Evaluation Metrics")
-                if overall_metrics.get("total_queries", 0) > 0:
-                    st.info(
-                        f"**Precision:** {overall_metrics.get('precision', 0.0):.1%}\n\n"
-                        f"**Recall:** {overall_metrics.get('recall', 0.0):.1%}\n\n"
-                        f"**F1 Score:** {(2 * overall_metrics.get('precision', 0.0) * overall_metrics.get('recall', 0.0) / (overall_metrics.get('precision', 0.0) + overall_metrics.get('recall', 0.0))):.1%}" if (overall_metrics.get('precision', 0.0) + overall_metrics.get('recall', 0.0)) > 0 else "N/A"
-                    )
-                else:
-                    st.info("No evaluation data available.")
-            
-            st.markdown("---")
-            
-            # Overall Metrics Summary
-            st.subheader("📄 Overall Metrics Summary")
-            overall_metrics_data = {
-                "Total Users": overall_metrics.get("total_users", 0),
-                "Total Queries": overall_metrics.get("total_queries", 0),
-                "Avg Relevance": f"{overall_metrics.get('avg_relevance', 0.0):.1%}",
-                "Avg Quality": f"{overall_metrics.get('avg_quality', 0.0):.1%}",
-                "Avg Response Time": f"{overall_metrics.get('avg_response_time', 0.0):.2f}s" if overall_metrics.get('avg_response_time', 0.0) > 0 else "N/A",
-                "Precision": f"{overall_metrics.get('precision', 0.0):.1%}",
-                "Recall": f"{overall_metrics.get('recall', 0.0):.1%}",
-            }
-            
-            # Display metrics
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("**Key Metrics:**")
-                for key, value in list(overall_metrics_data.items())[:3]:
-                    st.write(f"- **{key}:** {value}")
-            with col2:
-                st.markdown("**Additional Metrics:**")
-                for key, value in list(overall_metrics_data.items())[3:]:
-                    st.write(f"- **{key}:** {value}")
-            
-            # Download Overall Metrics
+        
+        # Overview Metrics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("👥 Total Users", overall_metrics.get("total_users", 0))
+        
+        with col2:
+            st.metric("💬 Total Queries", overall_metrics.get("total_queries", 0))
+        
+        with col3:
+            avg_rel = overall_metrics.get("avg_relevance", 0.0)
+            st.metric("⭐ Avg Relevance", f"{avg_rel:.1%}")
+        
+        with col4:
+            avg_qual = overall_metrics.get("avg_quality", 0.0)
+            st.metric("🎯 Avg Quality", f"{avg_qual:.1%}")
+        
+        st.markdown("---")
+        
+        # Overall Statistics
+        st.subheader("📈 Overall System Statistics")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("### System Performance")
             if overall_metrics.get("total_queries", 0) > 0:
-                st.markdown("---")
-                import json
-                overall_metrics_export = {
-                    "metrics": overall_metrics_data,
-                    "aggregate_data": overall_metrics,
-                    "generated_date": str(__import__("datetime").datetime.now()),
-                }
-                overall_metrics_json = json.dumps(overall_metrics_export, indent=2)
-                st.download_button(
-                    "📥 Download Overall Metrics (JSON)",
-                    overall_metrics_json,
-                    file_name=f"overall_metrics_{__import__('datetime').datetime.now().strftime('%Y%m%d')}.json",
-                    mime="application/json",
-                    use_container_width=True
+                avg_rt = overall_metrics.get("avg_response_time", 0.0)
+                rt_text = f"{avg_rt:.2f}s" if avg_rt > 0 else "N/A"
+                st.info(
+                    f"**Total Active Users:** {overall_metrics.get('total_users', 0)}\n\n"
+                    f"**Total Queries (All Users):** {overall_metrics.get('total_queries', 0)}\n\n"
+                    f"**Average Relevance:** {overall_metrics.get('avg_relevance', 0.0):.1%}\n\n"
+                    f"**Average Quality:** {overall_metrics.get('avg_quality', 0.0):.1%}\n\n"
+                    f"**Avg Response Time:** {rt_text}"
                 )
+            else:
+                st.info("No system-wide queries yet.")
+        
+        with col2:
+            st.markdown("### Evaluation Metrics")
+            if overall_metrics.get("total_queries", 0) > 0:
+                st.info(
+                    f"**Precision:** {overall_metrics.get('precision', 0.0):.1%}\n\n"
+                    f"**Recall:** {overall_metrics.get('recall', 0.0):.1%}\n\n"
+                    f"**F1 Score:** {(2 * overall_metrics.get('precision', 0.0) * overall_metrics.get('recall', 0.0) / (overall_metrics.get('precision', 0.0) + overall_metrics.get('recall', 0.0))):.1%}" if (overall_metrics.get('precision', 0.0) + overall_metrics.get('recall', 0.0)) > 0 else "N/A"
+                )
+            else:
+                st.info("No evaluation data available.")
+        
+        st.markdown("---")
+        
+        # Overall Metrics Summary
+        st.subheader("📄 Overall Metrics Summary")
+        overall_metrics_data = {
+            "Total Users": overall_metrics.get("total_users", 0),
+            "Total Queries": overall_metrics.get("total_queries", 0),
+            "Avg Relevance": f"{overall_metrics.get('avg_relevance', 0.0):.1%}",
+            "Avg Quality": f"{overall_metrics.get('avg_quality', 0.0):.1%}",
+            "Avg Response Time": f"{overall_metrics.get('avg_response_time', 0.0):.2f}s" if overall_metrics.get('avg_response_time', 0.0) > 0 else "N/A",
+            "Precision": f"{overall_metrics.get('precision', 0.0):.1%}",
+            "Recall": f"{overall_metrics.get('recall', 0.0):.1%}",
+        }
+        
+        # Display metrics
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Key Metrics:**")
+            for key, value in list(overall_metrics_data.items())[:3]:
+                st.write(f"- **{key}:** {value}")
+        with col2:
+            st.markdown("**Additional Metrics:**")
+            for key, value in list(overall_metrics_data.items())[3:]:
+                st.write(f"- **{key}:** {value}")
+        
+        # Download Overall Metrics
+        if overall_metrics.get("total_queries", 0) > 0:
+            st.markdown("---")
+            import json
+            overall_metrics_export = {
+                "metrics": overall_metrics_data,
+                "aggregate_data": overall_metrics,
+                "generated_date": str(__import__("datetime").datetime.now()),
+            }
+            overall_metrics_json = json.dumps(overall_metrics_export, indent=2)
+            st.download_button(
+                "📥 Download Overall Metrics (JSON)",
+                overall_metrics_json,
+                file_name=f"overall_metrics_{__import__('datetime').datetime.now().strftime('%Y%m%d')}.json",
+                mime="application/json",
+                use_container_width=True
+            )
     else:
         st.warning("⚠️ Overall metrics are not available in cloud deployment (file system access required).")
 
