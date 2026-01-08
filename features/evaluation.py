@@ -172,16 +172,16 @@ class RAGEvaluator:
         # Precision: relevant retrieved / total retrieved
         precision = relevant_retrieved / total_retrieved if total_retrieved > 0 else 0.0
         
-        # For recall, we need to estimate total relevant documents
-        # We'll use the average relevance score as a proxy
-        # If avg relevance is high, we're retrieving most relevant docs
+        # For recall, estimate total relevant documents
+        # Use the average relevance score as a proxy
+        # If avg relevance is high, the system is retrieving most relevant docs
         avg_relevance = sum(r.relevance_score for r in self.results) / len(self.results) if self.results else 0.0
         
-        # Estimate: if we have high relevance scores, we're likely retrieving most relevant docs
+        # Estimate: if the system has high relevance scores, it is likely retrieving most relevant docs
         # This is a simplified recall calculation
-        # In a real system, you'd need ground truth of all relevant docs
+        # In a real system, ground truth of all relevant docs is required
         estimated_total_relevant = total_retrieved * (avg_relevance / threshold) if threshold > 0 else total_retrieved
-        estimated_total_relevant = max(total_retrieved, estimated_total_relevant)  # At least what we retrieved
+        estimated_total_relevant = max(total_retrieved, estimated_total_relevant)  # At least what was retrieved
         
         recall = relevant_retrieved / estimated_total_relevant if estimated_total_relevant > 0 else 0.0
         recall = min(1.0, recall)  # Cap at 100%

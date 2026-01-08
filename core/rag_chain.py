@@ -92,7 +92,7 @@ class RAGChain:
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}")
             return {
-                "answer": f"Sorry, I encountered an error: {str(e)}",
+                "answer": f"An error was encountered: {str(e)}",
                 "source_documents": [],
             }
 

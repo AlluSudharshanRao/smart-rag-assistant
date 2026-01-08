@@ -1,6 +1,6 @@
 # 🚀 Smart RAG Document Assistant
 
-A production-ready Retrieval-Augmented Generation (RAG) system that enables intelligent Q&A over your documents using modern LLMs and vector databases.
+A production-ready Retrieval-Augmented Generation (RAG) system that enables intelligent Q&A over documents using modern LLMs and vector databases.
 
 ## ✨ Features
 
@@ -41,7 +41,7 @@ cd smart-rag-assistant
 pip install -r requirements.txt
 
 # Set environment variables
-export OPENAI_API_KEY="your-api-key"  # Optional
+export OPENAI_API_KEY="api-key"  # Optional
 export EMBEDDINGS_MODEL="sentence-transformers"  # or "openai"
 
 # Run the application
@@ -61,7 +61,7 @@ docker-compose up -d
 
 1. **Upload Documents**: Click "Upload Document" and select PDF/DOCX/TXT files
 2. **Process Documents**: Click "Process & Index" to chunk and embed documents
-3. **Ask Questions**: Type your question in the chat interface
+3. **Ask Questions**: Type questions in the chat interface
 4. **Get Answers**: Receive accurate answers with source citations
 
 ## 🏗️ Architecture
@@ -130,15 +130,15 @@ Contributions welcome! Please read CONTRIBUTING.md first.
 
 ## 📝 License
 
-MIT License - feel free to use this project for your portfolio!
+MIT License - feel free to use this project for portfolios and use cases.
 
 ## 🔗 Live Demo
 
-[Add your deployed link here]
+[Add deployed link here]
 
 ## 📸 Screenshots
 
-[Add screenshots of your application]
+[Add screenshots of the application]
 
 ---
 

@@ -250,7 +250,7 @@ class CollectionManager:
             
             # Delete the collection from ChromaDB
             # Note: ChromaDB doesn't have a direct delete_collection method
-            # We need to use the client to delete it
+            # The system requires using the client to delete it
             try:
                 client = collection.vectorstore._client
                 client.delete_collection(name=name)

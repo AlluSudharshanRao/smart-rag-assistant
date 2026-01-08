@@ -81,7 +81,7 @@ def initialize_vectorstore():
             )
         except Exception as e:
             st.error(f"❌ Error initializing embeddings: {str(e)}")
-            st.info("💡 **Solution:** Set `EMBEDDINGS_MODEL=openai` and `OPENAI_API_KEY` in your `.env` file to use OpenAI embeddings instead.")
+            st.info("💡 **Solution:** Set `EMBEDDINGS_MODEL=openai` and `OPENAI_API_KEY` in the `.env` file to use OpenAI embeddings instead.")
             raise
 
 
@@ -225,7 +225,7 @@ with st.sidebar:
                     else:
                         st.error(f"❌ Error: {result}")
             else:
-                st.caption("👆 Click the button above to process your document")
+                st.caption("👆 Click the button above to process the document")
     else:
         uploaded_files = st.file_uploader(
             "Choose multiple files",
@@ -272,7 +272,7 @@ with st.sidebar:
     )
 
 # Chat input - MUST be outside tabs (Streamlit requirement)
-if prompt := st.chat_input("Ask a question about your documents..."):
+if prompt := st.chat_input("Ask a question about the documents..."):
     # Check if vectorstore is initialized
     if st.session_state.vectorstore is None:
         st.warning("⚠️ **Please upload and process a document first!**")
@@ -295,7 +295,7 @@ if prompt := st.chat_input("Ask a question about your documents..."):
             response_time = time.time() - start_time
             
             # Extract answer and sources
-            answer = response.get("answer", "I couldn't generate an answer.")
+            answer = response.get("answer", "An answer could not be generated.")
             sources = response.get("source_documents", [])
             
             # Add assistant message to history
@@ -350,7 +350,7 @@ if prompt := st.chat_input("Ask a question about your documents..."):
 
 # Tab 1: Chat Interface
 with tab1:
-    st.header("💬 Chat with Your Documents")
+    st.header("💬 Chat with Documents")
     
     # Display chat history
     for message in st.session_state.chat_history:
@@ -426,7 +426,7 @@ with tab2:
     
     # Metrics Summary Section
     st.subheader("📄 Metrics Summary")
-    st.info("💡 **View your system metrics below!**")
+    st.info("💡 **View system metrics below!**")
     
     metrics_data = {
         "Documents Processed": collection_info.get("document_count", 0),
@@ -790,6 +790,6 @@ with tab5:
 st.markdown("---")
 st.markdown(
     "Built with ❤️ using Streamlit, LangChain, and ChromaDB | "
-    "[GitHub](https://github.com/yourusername/smart-rag-assistant)"
+    "[GitHub](https://github.com/username/smart-rag-assistant)"
 )
 
