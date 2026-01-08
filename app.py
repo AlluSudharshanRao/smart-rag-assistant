@@ -654,6 +654,9 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
+# Add spacer before chat input to prevent overlap with content
+st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
+
 # Chat input - MUST be outside tabs (Streamlit requirement)
 if prompt := st.chat_input("Ask a question about the documents..."):
     # Check if vectorstore is initialized
