@@ -43,8 +43,26 @@ st.markdown("""
     /* Main app styling */
     .main .block-container {
         padding-top: 2rem;
-        padding-bottom: 2rem;
+        padding-bottom: 6rem; /* Extra padding for chat input */
         max-width: 1400px;
+    }
+    
+    /* Add spacing to prevent chat input overlap */
+    .stTabs [data-baseweb="tab-panel"] {
+        padding-bottom: 5rem;
+    }
+    
+    /* Ensure chat input doesn't overlap content */
+    [data-testid="stChatInputContainer"] {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background: white;
+        border-top: 1px solid #e5e7eb;
+        padding: 1rem;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
     }
     
     /* Header styling - Neutral colors */
