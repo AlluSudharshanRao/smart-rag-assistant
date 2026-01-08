@@ -124,12 +124,13 @@ def process_uploaded_file(uploaded_file, collection_name: str = None):
         collection_name = collection_name or st.session_state.current_collection
         collection = st.session_state.collection_manager.get_collection(collection_name)
         
-        # Add metadata
+        # Add metadata including collection name
         file_size = len(uploaded_file.read())
         uploaded_file.seek(0)  # Reset file pointer
         metadata = {
             "source_file": uploaded_file.name,
             "file_size": file_size,
+            "collection_name": collection_name,  # Store collection name with each document
         }
         
         # Add to collection
@@ -168,13 +169,16 @@ with st.sidebar:
     st.header("📄 Document Upload")
     
     # Collection selector
-    st.subheader("📁 Collection")
+    st.subheader("📁 Collection Management")
+    st.caption("⚠️ **Important:** Queries search ONLY the selected collection!")
+    
     collection_options = st.session_state.collections_list
     selected_collection = st.selectbox(
-        "Select Collection",
+        "Active Collection (for queries)",
         options=collection_options,
         index=0 if st.session_state.current_collection in collection_options else 0,
-        help="Choose which collection to add documents to"
+        help="⚠️ This is the collection that will be searched when you ask questions. Switch collections to query different document sets.",
+        key="collection_selector_sidebar"
     )
     if selected_collection != st.session_state.current_collection:
         st.session_state.current_collection = selected_collection
@@ -182,6 +186,9 @@ with st.sidebar:
         collection = st.session_state.collection_manager.get_current_collection()
         st.session_state.vectorstore = collection.vectorstore
         st.session_state.rag_chain = None  # Reset RAG chain
+        st.success(f"✅ Switched to collection: **{selected_collection}**")
+        st.info(f"💡 All new queries will search the **{selected_collection}** collection")
+        st.rerun()
     
     # Create new collection
     with st.expander("➕ Create New Collection"):
@@ -325,12 +332,24 @@ if prompt := st.chat_input("Ask a question about the documents..."):
             answer = response.get("answer", "An answer could not be generated.")
             sources = response.get("source_documents", [])
             
-            # Add assistant message to history
+        # Get current collection name for tracking and add to source metadata
+        current_collection_name = st.session_state.current_collection
+        
+        # Ensure all sources have collection_name in metadata
+        for source in sources:
+            if "metadata" not in source:
+                source["metadata"] = {}
+            # Add collection name if missing (for backward compatibility)
+            if "collection_name" not in source["metadata"]:
+                source["metadata"]["collection_name"] = current_collection_name
+            
+            # Add assistant message to history with collection info
             st.session_state.chat_history.append({
                 "role": "assistant",
                 "content": answer,
                 "sources": sources,
-                "response_time": response_time
+                "response_time": response_time,
+                "collection_name": current_collection_name,  # Track which collection was queried
             })
             
             # Auto-evaluate the response
@@ -379,20 +398,64 @@ if prompt := st.chat_input("Ask a question about the documents..."):
 with tab1:
     st.header("💬 Chat with Documents")
     
+    # Display current collection info prominently
+    collection = st.session_state.collection_manager.get_current_collection()
+    collection_info = collection.get_collection_info()
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        if collection_info.get("document_count", 0) > 0:
+            st.info(f"📁 **Active Collection:** `{st.session_state.current_collection}` | 📄 **Documents:** {collection_info.get('document_count', 0)} | 💡 **All queries will search this collection**")
+        else:
+            st.warning(f"⚠️ **Active Collection:** `{st.session_state.current_collection}` | 📄 **No documents** - Please upload and process documents first!")
+    with col2:
+        st.caption("💡 Use sidebar to switch collections")
+    
+    st.markdown("---")
+    
     # Display chat history
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
             if message["role"] == "assistant" and "sources" in message:
-                with st.expander("📚 View Sources"):
-                    for i, source in enumerate(message["sources"], 1):
-                        st.text(f"Source {i}:")
-                        st.text(source["content"])
-                        st.json(source["metadata"])
+                # Show collection info if available
+                collection_used = message.get("collection_name", "Unknown")
+                with st.expander(f"📚 View Sources (from collection: {collection_used})"):
+                    if not message["sources"]:
+                        st.info("No sources retrieved for this response.")
+                    else:
+                        for i, source in enumerate(message["sources"], 1):
+                            source_metadata = source.get("metadata", {})
+                            source_file = source_metadata.get("source_file", "Unknown")
+                            source_collection = source_metadata.get("collection_name", collection_used)
+                            chunk_id = source_metadata.get("chunk_id", "N/A")
+                            
+                            # Display source info clearly
+                            st.markdown(f"### Source {i}")
+                            st.markdown(f"**📁 Collection:** `{source_collection}`")
+                            st.markdown(f"**📄 Document:** `{source_file}`")
+                            if chunk_id != "N/A":
+                                st.markdown(f"**📍 Chunk ID:** {chunk_id}")
+                            st.markdown("**📝 Content:**")
+                            st.text(source["content"][:500] + ("..." if len(source["content"]) > 500 else ""))
+                            with st.expander("🔍 Full Metadata"):
+                                st.json(source_metadata)
+                            if i < len(message["sources"]):
+                                st.markdown("---")
     
     # Show message if no documents uploaded
     if not st.session_state.chat_history:
         st.info("👆 **Use the chat input at the bottom of the page to ask questions!**")
+        
+        # Show helpful info about collections
+        if collection_info.get("document_count", 0) == 0:
+            st.info("""
+            **💡 How Collections Work:**
+            1. **Create/Select Collection** in the sidebar
+            2. **Upload & Process** documents (they'll be added to the selected collection)
+            3. **Ask Questions** - RAG will search only the active collection
+            4. **Switch Collections** to query different document sets
+            """)
 
 # Tab 2: Analytics Dashboard
 with tab2:
