@@ -886,32 +886,74 @@ with tab2:
         
         st.markdown("---")
         
-        # Usage Statistics
-        st.subheader("📈 Usage Statistics")
+        # Usage Statistics with enhanced cards
+        st.markdown("### 📈 Usage Statistics")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("### Collection Stats")
-            st.info(
-                f"**Collection Name:** {collection_info.get('name', 'N/A')}\n\n"
-                f"**Document Count:** {collection_info.get('document_count', 0)}\n\n"
-                f"**Storage:** {collection_info.get('persist_directory', 'N/A')}"
-            )
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1.5rem; border-radius: 12px; border-left: 5px solid #0ea5e9; box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);">
+                <h4 style="margin: 0 0 1rem 0; color: #0c4a6e;">📊 Collection Stats</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div>
+                        <p style="margin: 0; font-size: 0.85rem; color: #075985;">Collection Name</p>
+                        <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #0c4a6e;"><code style="background: white; padding: 0.3rem 0.6rem; border-radius: 4px;">{}</code></p>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-size: 0.85rem; color: #075985;">Document Count</p>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 1.5rem; font-weight: 700; color: #0c4a6e;">{}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0; font-size: 0.85rem; color: #075985;">Storage</p>
+                        <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #0c4a6e; font-size: 0.9rem;">{}</p>
+                    </div>
+                </div>
+            </div>
+            """.format(
+                collection_info.get('name', 'N/A'),
+                collection_info.get('document_count', 0),
+                collection_info.get('persist_directory', 'N/A')
+            ), unsafe_allow_html=True)
         
         with col2:
-            st.markdown("### Query Performance")
             if eval_summary.get("total_queries", 0) > 0:
                 avg_rt = eval_summary.get("avg_response_time", 0.0)
                 rt_text = f"{avg_rt:.2f}s" if avg_rt > 0 else "N/A"
-                st.info(
-                    f"**Total Queries:** {eval_summary.get('total_queries', 0)}\n\n"
-                    f"**Average Relevance:** {eval_summary.get('avg_relevance', 0.0):.1%}\n\n"
-                    f"**Average Quality:** {eval_summary.get('avg_quality', 0.0):.1%}\n\n"
-                    f"**Avg Response Time:** {rt_text}"
-                )
+                st.markdown("""
+                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 1.5rem; border-radius: 12px; border-left: 5px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);">
+                    <h4 style="margin: 0 0 1rem 0; color: #065f46;">⚡ Query Performance</h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div>
+                            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Total Queries</p>
+                            <p style="margin: 0.25rem 0 0 0; font-size: 1.5rem; font-weight: 700; color: #065f46;">{}</p>
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Average Relevance</p>
+                            <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #065f46;">{:.1%}</p>
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Average Quality</p>
+                            <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #065f46;">{:.1%}</p>
+                        </div>
+                        <div>
+                            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Avg Response Time</p>
+                            <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #065f46;">{}</p>
+                        </div>
+                    </div>
+                </div>
+                """.format(
+                    eval_summary.get('total_queries', 0),
+                    eval_summary.get('avg_relevance', 0.0),
+                    eval_summary.get('avg_quality', 0.0),
+                    rt_text
+                ), unsafe_allow_html=True)
             else:
-                st.info("No queries yet. Start chatting to see statistics!")
+                st.markdown("""
+                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; border-left: 5px solid #9ca3af; text-align: center;">
+                    <p style="margin: 0; color: #6b7280;">No queries yet. Start chatting to see statistics!</p>
+                </div>
+                """, unsafe_allow_html=True)
         
         st.markdown("---")
         
