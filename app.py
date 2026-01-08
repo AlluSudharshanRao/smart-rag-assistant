@@ -46,23 +46,31 @@ st.markdown("""
         max-width: 1400px;
     }
     
-    /* Header styling */
+    /* Header styling - More vibrant */
     h1 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 15%, #ec4899 30%, #8b5cf6 45%, #6366f1 60%, #06b6d4 75%, #10b981 90%, #f59e0b 100%);
+        background-size: 200% 200%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        font-size: 2.5rem;
-        font-weight: 700;
+        animation: gradientShift 5s ease infinite;
+        font-size: 3rem;
+        font-weight: 800;
         margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
     }
     
     h2 {
-        color: #1f2937;
-        font-weight: 600;
+        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 25%, #ec4899 50%, #8b5cf6 75%, #6366f1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        font-size: 2rem;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
-        border-left: 4px solid #667eea;
+        border-left: 5px solid;
+        border-image: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #6366f1) 1;
         padding-left: 1rem;
     }
     
@@ -72,93 +80,143 @@ st.markdown("""
         margin-top: 1rem;
     }
     
-    /* Sidebar styling */
+    /* Sidebar styling - More colorful */
     .css-1d391kg {
-        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        background: linear-gradient(180deg, #fef3c7 0%, #fde68a 15%, #e0e7ff 30%, #ddd6fe 45%, #f0e68c 60%, #dbeafe 75%, #e0e7ff 90%, #fef3c7 100%);
+        background-size: 100% 200%;
     }
     
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+        background: linear-gradient(180deg, #fef3c7 0%, #fde68a 15%, #e0e7ff 30%, #ddd6fe 45%, #f0e68c 60%, #dbeafe 75%, #e0e7ff 90%, #fef3c7 100%);
+        background-size: 100% 200%;
+        animation: gradientShift 8s ease infinite;
+        box-shadow: 4px 0 20px rgba(139, 92, 246, 0.15);
     }
     
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
         color: #1f2937;
     }
     
-    /* Button styling */
+    /* Button styling - More colorful */
     .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 25%, #ec4899 50%, #8b5cf6 75%, #6366f1 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 3s ease infinite;
         color: white;
         border: none;
-        border-radius: 8px;
-        padding: 0.5rem 1.5rem;
-        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 700;
+        font-size: 1rem;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+        box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4);
     }
     
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.6);
+        animation: gradientShift 1s ease infinite;
     }
     
-    /* Metric cards */
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    /* Metric cards - More colorful */
     [data-testid="stMetricValue"] {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #667eea;
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 25%, #ec4899 50%, #8b5cf6 75%, #6366f1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     [data-testid="stMetricLabel"] {
-        font-size: 0.9rem;
-        color: #6b7280;
-        font-weight: 500;
+        font-size: 1rem;
+        background: linear-gradient(135deg, #f59e0b 0%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 600;
     }
     
-    /* Info boxes */
+    /* Info boxes - More vibrant colors */
     .stInfo {
-        background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
-        border-left: 4px solid #667eea;
-        border-radius: 8px;
-        padding: 1rem;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 25%, #ddd6fe 50%, #e0e7ff 75%, #dbeafe 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 4s ease infinite;
+        border-left: 5px solid;
+        border-image: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6) 1;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
     }
     
     .stSuccess {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        border-left: 4px solid #10b981;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 25%, #86efac 50%, #6ee7b7 75%, #d1fae5 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 4s ease infinite;
+        border-left: 5px solid;
+        border-image: linear-gradient(135deg, #10b981, #059669, #047857) 1;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
     }
     
     .stWarning {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border-left: 4px solid #f59e0b;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 25%, #fcd34d 50%, #fbbf24 75%, #fef3c7 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 4s ease infinite;
+        border-left: 5px solid;
+        border-image: linear-gradient(135deg, #f59e0b, #d97706, #b45309) 1;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
     }
     
     .stError {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        border-left: 4px solid #ef4444;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 25%, #fca5a5 50%, #f87171 75%, #fee2e2 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 4s ease infinite;
+        border-left: 5px solid;
+        border-image: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c) 1;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
     }
     
-    /* Tabs styling */
+    /* Tabs styling - Bigger and more colorful */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #f9fafb;
-        padding: 0.5rem;
-        border-radius: 8px;
+        gap: 12px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 20%, #e0e7ff 40%, #ddd6fe 60%, #f0e68c 80%, #fef3c7 100%);
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     
     .stTabs [data-baseweb="tab"] {
-        border-radius: 6px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
+        border-radius: 10px;
+        padding: 1.25rem 2rem;
+        font-weight: 700;
+        font-size: 1.1rem;
         transition: all 0.3s ease;
+        border: 2px solid transparent;
+        background: rgba(255, 255, 255, 0.7);
+        color: #374151;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
     
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 25%, #ec4899 50%, #8b5cf6 75%, #6366f1 100%);
         color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        transform: translateY(-2px);
     }
     
     /* Expander styling */
@@ -187,24 +245,31 @@ st.markdown("""
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
-    /* Selectbox styling */
+    /* Selectbox styling - More colorful */
     .stSelectbox > div > div {
-        border-radius: 8px;
-        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        border: 2px solid;
+        border-image: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6) 1;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+        font-weight: 600;
     }
     
-    /* File uploader styling */
+    /* File uploader styling - More colorful */
     [data-testid="stFileUploader"] {
-        border: 2px dashed #cbd5e1;
-        border-radius: 12px;
-        padding: 2rem;
-        background: #f8fafc;
+        border: 3px dashed;
+        border-image: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #6366f1) 1;
+        border-radius: 15px;
+        padding: 2.5rem;
+        background: linear-gradient(135deg, rgba(254, 243, 199, 0.3) 0%, rgba(232, 232, 255, 0.3) 50%, rgba(254, 243, 199, 0.3) 100%);
         transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
     }
     
     [data-testid="stFileUploader"]:hover {
-        border-color: #667eea;
-        background: #f0f4ff;
+        border-image: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #6366f1) 1;
+        background: linear-gradient(135deg, rgba(254, 243, 199, 0.5) 0%, rgba(232, 232, 255, 0.5) 50%, rgba(254, 243, 199, 0.5) 100%);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+        transform: translateY(-2px);
     }
     
     /* Progress bar */
@@ -279,31 +344,45 @@ st.markdown("""
         background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
     }
     
-    /* Radio button styling */
+    /* Radio button styling - More colorful */
     .stRadio > div {
         gap: 1rem;
     }
     
     .stRadio > div > label {
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        border: 2px solid #e5e7eb;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        border: 3px solid;
+        border-image: linear-gradient(135deg, #f59e0b, #8b5cf6, #6366f1) 1;
         transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.7);
+        font-weight: 600;
+        font-size: 1rem;
     }
     
     .stRadio > div > label:hover {
-        border-color: #667eea;
-        background: #f0f4ff;
+        background: linear-gradient(135deg, rgba(254, 243, 199, 0.5) 0%, rgba(232, 232, 255, 0.5) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
     }
     
-    /* Download button */
+    .stRadio > div > [data-baseweb="radio"] > div > div {
+        background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899, #8b5cf6);
+    }
+    
+    /* Download button - More colorful */
     .stDownloadButton > button {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25);
+        background: linear-gradient(135deg, #10b981 0%, #059669 25%, #06b6d4 50%, #0891b2 75%, #10b981 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 3s ease infinite;
+        box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+        font-weight: 700;
+        font-size: 1rem;
     }
     
     .stDownloadButton > button:hover {
-        box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.6);
+        transform: translateY(-2px) scale(1.05);
     }
     
     /* Sidebar header */
@@ -449,10 +528,17 @@ def process_uploaded_file(uploaded_file, collection_name: str = None):
 
 # UI Layout with tabs
 st.markdown("""
-<div style="text-align: center; padding: 2rem 0 1.5rem 0; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-radius: 16px; margin-bottom: 2rem;">
-    <h1 style="margin-bottom: 0.5rem; font-size: 2.8rem;">📚 Smart RAG Document Assistant</h1>
-    <p style="font-size: 1.15rem; color: #6b7280; margin: 0; font-weight: 500;">AI-Powered Document Intelligence • Ask Questions, Get Instant Answers</p>
+<div style="text-align: center; padding: 2.5rem 0 1.5rem 0; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 10%, #e0e7ff 25%, #ddd6fe 40%, #f0e68c 55%, #dbeafe 70%, #e0e7ff 85%, #fef3c7 100%); background-size: 200% 200%; animation: gradientShift 8s ease infinite; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2); border: 3px solid rgba(255, 255, 255, 0.5);">
+    <h1 style="margin-bottom: 0.5rem; font-size: 3.2rem; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 15%, #ec4899 30%, #8b5cf6 45%, #6366f1 60%, #06b6d4 75%, #10b981 90%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; background-size: 200% 200%; animation: gradientShift 5s ease infinite; font-weight: 800;">📚 Smart RAG Document Assistant</h1>
+    <p style="font-size: 1.25rem; background: linear-gradient(135deg, #f59e0b 0%, #8b5cf6 50%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0.5rem 0 0 0; font-weight: 600;">AI-Powered Document Intelligence • Ask Questions, Get Instant Answers</p>
 </div>
+<style>
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+</style>
 """, unsafe_allow_html=True)
 
 # Create tabs
