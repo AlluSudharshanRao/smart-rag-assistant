@@ -19,6 +19,8 @@ from utils.user_manager import (
     get_user_id, 
     get_user_chat_path, 
     get_user_evaluations_path,
+    get_user_chromadb_dir,
+    get_user_collections_path,
     get_overall_metrics
 )
 from features.multi_document import CollectionManager
@@ -383,6 +385,15 @@ except Exception as e:
 # Get user-specific paths
 EVALS_PATH = get_user_evaluations_path(DATA_DIR, user_id) if DATA_DIR else None
 CHAT_PATH = get_user_chat_path(DATA_DIR, user_id) if DATA_DIR else None
+USER_CHROMADB_DIR = get_user_chromadb_dir(DATA_DIR, user_id) if DATA_DIR else Path(f"./chroma_db/users/{user_id}")
+COLLECTIONS_PATH = get_user_collections_path(DATA_DIR, user_id) if DATA_DIR else None
+
+# Initialize user-scoped collection manager
+if "collection_manager" not in st.session_state:
+    st.session_state.collection_manager = CollectionManager(
+        user_id=user_id,
+        persist_directory=str(USER_CHROMADB_DIR)
+    )
 
 if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
@@ -390,14 +401,37 @@ if "rag_chain" not in st.session_state:
     st.session_state.rag_chain = None
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-if "collection_manager" not in st.session_state:
-    st.session_state.collection_manager = CollectionManager()
 if "evaluator" not in st.session_state:
     st.session_state.evaluator = RAGEvaluator()
 if "current_collection" not in st.session_state:
     st.session_state.current_collection = "default"
 if "collections_list" not in st.session_state:
-    st.session_state.collections_list = ["default"]
+    # Load user-specific collections list
+    if COLLECTIONS_PATH and COLLECTIONS_PATH.exists():
+        try:
+            import json as _json
+            st.session_state.collections_list = _json.loads(COLLECTIONS_PATH.read_text(encoding="utf-8"))
+            # Ensure default exists
+            if "default" not in st.session_state.collections_list:
+                st.session_state.collections_list.insert(0, "default")
+        except Exception as e:
+            logger.error(f"Error loading collections list: {e}")
+            st.session_state.collections_list = ["default"]
+    else:
+        st.session_state.collections_list = ["default"]
+def save_user_collections_list():
+    """Save user's collections list to disk."""
+    if COLLECTIONS_PATH:
+        try:
+            import json as _json
+            COLLECTIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
+            COLLECTIONS_PATH.write_text(
+                _json.dumps(st.session_state.collections_list, indent=2),
+                encoding="utf-8"
+            )
+        except Exception as e:
+            logger.error(f"Error saving collections list: {e}")
+
 if "state_loaded" not in st.session_state:
     # Load persisted evaluator for this user (if file system is available)
     if EVALS_PATH:
@@ -447,16 +481,13 @@ def process_uploaded_file(uploaded_file, collection_name: str = None):
         collection_name = collection_name or st.session_state.current_collection
         collection = st.session_state.collection_manager.get_collection(collection_name)
         
-        # Add metadata including collection name, uploader, and timestamp
+        # Add metadata including collection name
         file_size = len(uploaded_file.read())
         uploaded_file.seek(0)  # Reset file pointer
-        import datetime
         metadata = {
             "source_file": uploaded_file.name,
             "file_size": file_size,
             "collection_name": collection_name,  # Store collection name with each document
-            "uploaded_by": user_id,  # Track who uploaded the document
-            "uploaded_at": datetime.datetime.now().isoformat(),  # Track when it was uploaded
         }
         
         # Add to collection
@@ -551,6 +582,7 @@ with st.sidebar:
                     try:
                         st.session_state.collection_manager.create_collection(new_collection_name)
                         st.session_state.collections_list.append(new_collection_name)
+                        save_user_collections_list()  # Save to disk
                         st.session_state.current_collection = new_collection_name
                         st.success(f"✅ Created collection: {new_collection_name}")
                         st.rerun()
@@ -1311,6 +1343,7 @@ with tab4:
                             manager.delete_collection(col_name)
                             if col_name in st.session_state.collections_list:
                                 st.session_state.collections_list.remove(col_name)
+                                save_user_collections_list()  # Save to disk
                             st.success(f"✅ Successfully deleted collection: {col_name}")
                             st.rerun()
                         except ValueError as e:
@@ -1341,6 +1374,7 @@ with tab4:
                 try:
                     manager.create_collection(new_col)
                     st.session_state.collections_list.append(new_col)
+                    save_user_collections_list()  # Save to disk
                     st.success(f"✅ Created collection: {new_col}")
                     st.rerun()
                 except Exception as e:
@@ -1373,21 +1407,13 @@ with tab5:
     
     # Document List
     st.subheader("📋 Document List")
-    st.info("🌐 **Collaborative:** All documents uploaded by any user are visible to everyone in this collection. Your chat history remains private.")
     
     try:
         # Get documents grouped by source file using the new method
         source_files = collection.get_documents_by_source()
         
         if source_files:
-            # Count documents by uploader
-            uploader_count = {}
-            for source_file, info in source_files.items():
-                metadata = info.get('metadata', {})
-                uploader = metadata.get('uploaded_by', 'Unknown')
-                uploader_count[uploader] = uploader_count.get(uploader, 0) + 1
-            
-            st.info(f"📊 Found {len(source_files)} unique document(s) in this collection (from {len(uploader_count)} user(s))")
+            st.info(f"📊 Found {len(source_files)} unique document(s) in this collection")
             
             # Display documents
             for source_file, info in source_files.items():
@@ -1396,35 +1422,11 @@ with tab5:
                     with col1:
                         st.write(f"**Chunks:** {info['count']}")
                         if info.get('metadata'):
-                            metadata = info['metadata']
-                            file_size = metadata.get('file_size', 'N/A')
+                            file_size = info['metadata'].get('file_size', 'N/A')
                             if file_size != 'N/A':
                                 file_size_str = f"{file_size:,} bytes" if isinstance(file_size, int) else str(file_size)
                                 st.write(f"**File Size:** {file_size_str}")
-                            
-                            # Display uploader information
-                            uploaded_by = metadata.get('uploaded_by', 'Unknown')
-                            uploaded_at = metadata.get('uploaded_at', 'Unknown')
-                            
-                            if uploaded_by != 'Unknown' or uploaded_at != 'Unknown':
-                                st.markdown("---")
-                                st.markdown("**📤 Upload Information:**")
-                                if uploaded_by != 'Unknown':
-                                    # Format user ID for display (show first 8 chars)
-                                    display_user = uploaded_by[:8] + "..." if len(uploaded_by) > 8 else uploaded_by
-                                    st.write(f"**Uploaded by:** `{display_user}`")
-                                if uploaded_at != 'Unknown':
-                                    try:
-                                        from datetime import datetime
-                                        dt = datetime.fromisoformat(uploaded_at.replace('Z', '+00:00'))
-                                        formatted_date = dt.strftime('%Y-%m-%d %H:%M:%S')
-                                        st.write(f"**Uploaded at:** {formatted_date}")
-                                    except:
-                                        st.write(f"**Uploaded at:** {uploaded_at}")
-                            
-                            # Show full metadata in expandable section
-                            with st.expander("🔍 View Full Metadata"):
-                                st.json(metadata)
+                            st.json(info['metadata'])
                     with col2:
                         delete_key = f"delete_doc_{source_file}_{hash(source_file)}"
                         if st.button(

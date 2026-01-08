@@ -72,6 +72,32 @@ def get_user_evaluations_path(base_dir: Path, user_id: str) -> Optional[Path]:
     return user_dir / "evaluations.json"
 
 
+def get_user_chromadb_dir(base_dir: Path, user_id: str) -> Path:
+    """Get user-specific ChromaDB directory path."""
+    if base_dir is None:
+        # Fallback to relative path if base_dir is None
+        return Path(f"./chroma_db/users/{user_id}")
+    user_dir = get_user_data_dir(base_dir, user_id)
+    chroma_dir = user_dir / "chroma_db"
+    chroma_dir.mkdir(parents=True, exist_ok=True)
+    return chroma_dir
+
+
+def get_user_collections_path(base_dir: Path, user_id: str) -> Optional[Path]:
+    """Get user-specific collections list file path."""
+    if base_dir is None:
+        return None
+    user_dir = get_user_data_dir(base_dir, user_id)
+    return user_dir / "collections.json"
+
+
+def get_user_collection_name(user_id: str, collection_name: str) -> str:
+    """Get user-scoped collection name."""
+    # Format: user_{user_id}_{collection_name}
+    # This ensures each user has isolated collections
+    return f"user_{user_id}_{collection_name}"
+
+
 def get_all_user_dirs(base_dir: Path) -> list:
     """Get all user directories for admin/overall metrics."""
     if base_dir is None:

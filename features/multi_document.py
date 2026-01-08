@@ -43,26 +43,41 @@ class DocumentCollection:
         
         return True, ""
     
-    def __init__(self, collection_name: str = "default"):
+    def __init__(self, collection_name: str = "default", persist_directory: str = None, user_id: str = None):
         """
         Initialize a document collection.
         
         Args:
-            collection_name: Name of the collection
+            collection_name: Name of the collection (will be scoped to user if user_id provided)
+            persist_directory: ChromaDB persist directory (user-specific if user_id provided)
+            user_id: User ID to scope this collection (optional, for isolation)
         """
-        # Validate collection name
+        # Validate base collection name (before user scoping)
         is_valid, error_msg = self.validate_collection_name(collection_name)
         if not is_valid:
             raise ValueError(f"Invalid collection name: {error_msg}")
         
-        self.collection_name = collection_name
+        # Store original name and user-scoped name
+        self.base_collection_name = collection_name
+        self.user_id = user_id
+        
+        if user_id:
+            # Scope collection name to user
+            from utils.user_manager import get_user_collection_name
+            self.collection_name = get_user_collection_name(user_id, collection_name)
+        else:
+            self.collection_name = collection_name
+        
+        # Use provided persist_directory or default
+        self.persist_directory = persist_directory or settings.chroma_persist_directory
+        
         self.embeddings = get_embeddings()
         self.vectorstore = Chroma(
-            collection_name=collection_name,
-            persist_directory=settings.chroma_persist_directory,
+            collection_name=self.collection_name,
+            persist_directory=str(self.persist_directory),
             embedding_function=self.embeddings,
         )
-        logger.info(f"Initialized collection: {collection_name}")
+        logger.info(f"Initialized collection: {self.collection_name} (base: {self.base_collection_name})")
     
     def add_documents(self, documents: List, metadata: Optional[Dict] = None):
         """Add documents to collection."""
@@ -87,14 +102,14 @@ class DocumentCollection:
             collection = self.vectorstore._collection
             count = collection.count()
             return {
-                "name": self.collection_name,
+                "name": self.base_collection_name,  # Return base name for display
                 "document_count": count,
-                "persist_directory": settings.chroma_persist_directory,
+                "persist_directory": str(self.persist_directory),
             }
         except Exception as e:
             logger.error(f"Error getting collection info: {e}")
             return {
-                "name": self.collection_name,
+                "name": self.base_collection_name,
                 "document_count": 0,
                 "error": str(e),
             }
@@ -192,7 +207,16 @@ class DocumentCollection:
 class CollectionManager:
     """Manages multiple document collections."""
     
-    def __init__(self):
+    def __init__(self, user_id: str = None, persist_directory: str = None):
+        """
+        Initialize collection manager.
+        
+        Args:
+            user_id: User ID to scope all collections to this user
+            persist_directory: ChromaDB persist directory (user-specific)
+        """
+        self.user_id = user_id
+        self.persist_directory = persist_directory
         self.collections: Dict[str, DocumentCollection] = {}
         self.current_collection: Optional[str] = None
     
@@ -202,14 +226,22 @@ class CollectionManager:
             logger.warning(f"Collection {name} already exists")
             return self.collections[name]
         
-        collection = DocumentCollection(collection_name=name)
+        collection = DocumentCollection(
+            collection_name=name,
+            persist_directory=self.persist_directory,
+            user_id=self.user_id
+        )
         self.collections[name] = collection
         return collection
     
     def get_collection(self, name: str) -> DocumentCollection:
         """Get a collection by name."""
         if name not in self.collections:
-            self.collections[name] = DocumentCollection(collection_name=name)
+            self.collections[name] = DocumentCollection(
+                collection_name=name,
+                persist_directory=self.persist_directory,
+                user_id=self.user_id
+            )
         return self.collections[name]
     
     def switch_collection(self, name: str):
