@@ -1,6 +1,4 @@
-"""Streamlit frontend for the RAG Document Assistant.
-All changes pushed to GitHub - ready for deployment.
-"""
+"""Streamlit frontend for the RAG Document Assistant."""
 import os
 import tempfile
 import json
@@ -31,7 +29,7 @@ from features.evaluation import RAGEvaluator
 # Page configuration
 st.set_page_config(
     page_title="Smart RAG Document Assistant",
-    page_icon="📚",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -354,6 +352,19 @@ st.markdown("""
     .stSpinner > div {
         border-color: #6b7280;
     }
+    
+    /* Icon replacements using CSS classes */
+    .icon-success::before { content: "✓"; }
+    .icon-error::before { content: "✗"; }
+    .icon-warning::before { content: "⚠"; }
+    .icon-info::before { content: "ℹ"; }
+    
+    /* Text-based icons using CSS classes */
+    .icon-text {
+        display: inline-block;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -428,6 +439,8 @@ if "collections_list" not in st.session_state:
             st.session_state.collections_list = ["default"]
     else:
         st.session_state.collections_list = ["default"]
+
+
 def save_user_collections_list():
     """Save user's collections list to disk."""
     if COLLECTIONS_PATH:
@@ -469,8 +482,9 @@ def initialize_vectorstore():
                 embedding_function=embeddings,
             )
         except Exception as e:
-            st.error(f"❌ Error initializing embeddings: {str(e)}")
-            st.info("💡 **Solution:** Set `EMBEDDINGS_MODEL=openai` and `OPENAI_API_KEY` in the `.env` file to use OpenAI embeddings instead.")
+            logger.error(f"Error initializing embeddings: {e}")
+            st.error(f"Error initializing embeddings: {str(e)}")
+            st.info("**Solution:** Set `EMBEDDINGS_MODEL=openai` and `OPENAI_API_KEY` in the `.env` file to use OpenAI embeddings instead.")
             raise
 
 
@@ -520,35 +534,35 @@ def process_uploaded_file(uploaded_file, collection_name: str = None):
 # UI Layout with tabs
 st.markdown("""
 <div style="text-align: center; padding: 2rem 0 1.5rem 0; background: #f9fafb; border-radius: 16px; margin-bottom: 2rem; border: 1px solid #e5e7eb;">
-    <h1 style="margin-bottom: 0.5rem; font-size: 2.8rem; color: #1f2937;">📚 Smart RAG Document Assistant</h1>
+    <h1 style="margin-bottom: 0.5rem; font-size: 2.8rem; color: #1f2937;">Smart RAG Document Assistant</h1>
     <p style="font-size: 1.15rem; color: #6b7280; margin: 0; font-weight: 500;">AI-Powered Document Intelligence • Ask Questions, Get Instant Answers</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Create tabs
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "💬 Chat", 
-    "👤 Profile",
-    "📊 Analytics", 
-    "📁 Collections", 
-    "📄 Documents", 
-    "💾 Export/Import"
+    "Chat", 
+    "Profile",
+    "Analytics", 
+    "Collections", 
+    "Documents", 
+    "Export/Import"
 ])
 
 # Sidebar for document upload
 with st.sidebar:
     st.markdown("""
     <div style="text-align: center; padding: 1rem 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb;">
-        <h2 style="margin: 0; color: #1f2937;">📄 Document Upload</h2>
+        <h2 style="margin: 0; color: #1f2937;">Document Upload</h2>
         <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 0.9rem;">Manage your documents and collections</p>
     </div>
     """, unsafe_allow_html=True)
     
     # Collection selector
-    st.markdown("### 📁 Collection Management")
+    st.markdown("### Collection Management")
     st.markdown("""
     <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
-        <p style="margin: 0; font-size: 0.85rem; color: #92400e;"><strong>⚠️ Important:</strong> Queries search ONLY the selected collection!</p>
+        <p style="margin: 0; font-size: 0.85rem; color: #92400e;"><strong>Important:</strong> Queries search ONLY the selected collection!</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -557,7 +571,7 @@ with st.sidebar:
         "Active Collection (for queries)",
         options=collection_options,
         index=0 if st.session_state.current_collection in collection_options else 0,
-        help="⚠️ This is the collection that will be searched when you ask questions. Switch collections to query different document sets.",
+        help="This is the collection that will be searched when you ask questions. Switch collections to query different document sets.",
         key="collection_selector_sidebar"
     )
     if selected_collection != st.session_state.current_collection:
@@ -566,12 +580,12 @@ with st.sidebar:
         collection = st.session_state.collection_manager.get_current_collection()
         st.session_state.vectorstore = collection.vectorstore
         st.session_state.rag_chain = None  # Reset RAG chain
-        st.success(f"✅ Switched to collection: **{selected_collection}**")
-        st.info(f"💡 All new queries will search the **{selected_collection}** collection")
+        st.success(f"Switched to collection: **{selected_collection}**")
+        st.info(f"All new queries will search the **{selected_collection}** collection")
         st.rerun()
     
     # Create new collection
-    with st.expander("➕ Create New Collection"):
+    with st.expander("Create New Collection"):
         new_collection_name = st.text_input(
             "Collection Name", 
             placeholder="e.g., research-papers (min 3 chars, a-z, 0-9, ., _, -)",
@@ -584,21 +598,22 @@ with st.sidebar:
                 is_valid, error_msg = DocumentCollection.validate_collection_name(new_collection_name)
                 
                 if not is_valid:
-                    st.error(f"❌ Invalid collection name: {error_msg}")
+                    st.error(f"Invalid collection name: {error_msg}")
                 elif new_collection_name in st.session_state.collections_list:
-                    st.error("❌ Collection already exists!")
+                    st.error("Collection already exists!")
                 else:
                     try:
                         st.session_state.collection_manager.create_collection(new_collection_name)
                         st.session_state.collections_list.append(new_collection_name)
                         save_user_collections_list()  # Save to disk
                         st.session_state.current_collection = new_collection_name
-                        st.success(f"✅ Created collection: {new_collection_name}")
+                        st.success(f"Created collection: {new_collection_name}")
                         st.rerun()
                     except Exception as e:
-                        st.error(f"❌ Error creating collection: {str(e)}")
+                        logger.error(f"Error creating collection: {e}")
+                        st.error(f"Error creating collection: {str(e)}")
             else:
-                st.warning("⚠️ Please enter a collection name")
+                st.warning("Please enter a collection name")
     
     # Collection info with better styling
     if st.session_state.current_collection:
@@ -607,7 +622,7 @@ with st.sidebar:
         doc_count = info.get('document_count', 0)
         st.markdown("""
         <div style="background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%); padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #667eea;">
-            <p style="margin: 0; font-size: 0.9rem; color: #1f2937;"><strong>📊 Current Collection Stats</strong></p>
+            <p style="margin: 0; font-size: 0.9rem; color: #1f2937;"><strong>Current Collection Stats</strong></p>
             <p style="margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: 700; color: #667eea;">{}</p>
             <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Documents indexed</p>
         </div>
@@ -630,20 +645,20 @@ with st.sidebar:
         )
         
         if uploaded_file is not None:
-            st.info(f"📎 **File ready:** {uploaded_file.name}")
-            if st.button("🔄 Process & Index Document", type="primary", use_container_width=True):
+            st.info(f"**File ready:** {uploaded_file.name}")
+            if st.button("Process & Index Document", type="primary", use_container_width=True):
                 with st.spinner("Processing document..."):
                     success, result = process_uploaded_file(uploaded_file, st.session_state.current_collection)
                     if success:
-                        st.success(f"✅ Successfully processed! Created {result} chunks.")
-                        st.balloons()
+                        st.success(f"Successfully processed! Created {result} chunks.")
                         collection = st.session_state.collection_manager.get_current_collection()
                         info = collection.get_collection_info()
                         st.rerun()
                     else:
-                        st.error(f"❌ Error: {result}")
+                        logger.error(f"Error processing file: {result}")
+                        st.error(f"Error: {result}")
             else:
-                st.caption("👆 Click the button above to process the document")
+                st.caption("Click the button above to process the document")
     else:
         uploaded_files = st.file_uploader(
             "Choose multiple files",
@@ -653,8 +668,8 @@ with st.sidebar:
         )
         
         if uploaded_files:
-            st.info(f"📎 **{len(uploaded_files)} file(s) ready**")
-            if st.button("🔄 Process All Documents", type="primary", use_container_width=True):
+            st.info(f"**{len(uploaded_files)} file(s) ready**")
+            if st.button("Process All Documents", type="primary", use_container_width=True):
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 results = []
@@ -667,34 +682,35 @@ with st.sidebar:
                 
                 # Show results
                 successful = sum(1 for _, s, _ in results if s)
-                st.success(f"✅ Processed {successful}/{len(uploaded_files)} files successfully!")
+                st.success(f"Processed {successful}/{len(uploaded_files)} files successfully!")
                 if successful < len(uploaded_files):
-                    st.warning(f"⚠️ {len(uploaded_files) - successful} file(s) failed")
+                    st.warning(f"{len(uploaded_files) - successful} file(s) failed")
                 
                 # Show details
-                with st.expander("📋 View Processing Details"):
+                with st.expander("View Processing Details"):
                     for name, success, result in results:
                         if success:
-                            st.success(f"✅ {name}: {result} chunks")
+                            st.success(f"{name}: {result} chunks")
                         else:
-                            st.error(f"❌ {name}: {result}")
+                            logger.error(f"Failed to process {name}: {result}")
+                            st.error(f"{name}: {result}")
                 
                 st.rerun()
     
     st.markdown("---")
-    st.markdown("### 👤 Session Info")
+    st.markdown("### Session Info")
     st.markdown(f"""
     <div style="background: #f9fafb; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e5e7eb;">
         <p style="margin: 0; font-size: 0.85rem; color: #6b7280;"><strong>User ID:</strong> <code style="background: #e5e7eb; padding: 0.2rem 0.4rem; border-radius: 4px;">{user_id[:8]}...</code></p>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #9ca3af;">💡 Each user has isolated chat history and metrics</p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #9ca3af;">Each user has isolated chat history and metrics</p>
     </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("### ⚙️ Settings")
+    st.markdown("### Settings")
     
     # Hybrid Search Toggle
     use_hybrid = st.checkbox(
-        "🔀 Enable Hybrid Search",
+        "Enable Hybrid Search",
         value=settings.use_hybrid_search,
         help="Combine semantic (vector) and keyword (BM25) search for better retrieval",
         key="hybrid_search_toggle"
@@ -707,7 +723,7 @@ with st.sidebar:
     
     # RAGAS Evaluation Toggle
     enable_ragas = st.checkbox(
-        "📊 Enable RAGAS Metrics",
+        "Enable RAGAS Metrics",
         value=st.session_state.get("enable_ragas", True),
         help="Calculate RAGAS metrics (Faithfulness, Answer Relevancy, Context Precision/Recall). Note: This may slow down responses.",
         key="ragas_toggle"
@@ -730,8 +746,8 @@ st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 if prompt := st.chat_input("Ask a question about the documents..."):
     # Check if vectorstore is initialized
     if st.session_state.vectorstore is None:
-        st.warning("⚠️ **Please upload and process a document first!**")
-        st.info("💡 **Steps:** 1) Upload a file in the sidebar → 2) Click 'Process & Index Document' → 3) Then ask questions here!")
+        st.warning("**Please upload and process a document first!**")
+        st.info("**Steps:** 1) Upload a file in the sidebar → 2) Click 'Process & Index Document' → 3) Then ask questions here!")
     else:
         # Initialize RAG chain if not already done or if settings changed
         needs_reinit = False
@@ -827,14 +843,14 @@ if prompt := st.chat_input("Ask a question about the documents..."):
             
             st.rerun()
         except Exception as e:
-            st.error(f"❌ Error generating response: {str(e)}")
             logger.error(f"RAG query error: {e}")
+            st.error(f"Error generating response: {str(e)}")
 
 # Tab 1: Chat Interface
 with tab1:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
-        <h2 style="margin-bottom: 1rem;">💬 Chat with Documents</h2>
+        <h2 style="margin-bottom: 1rem;">Chat with Documents</h2>
     </div>
     """, unsafe_allow_html=True)
     
@@ -848,15 +864,15 @@ with tab1:
         <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 5px solid #6b7280; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid #e5e7eb;">
             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
                 <div>
-                    <p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-weight: 600;">📁 ACTIVE COLLECTION</p>
+                    <p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-weight: 600;">ACTIVE COLLECTION</p>
                     <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #1f2937;">{st.session_state.current_collection}</p>
                 </div>
                 <div style="flex: 1; min-width: 200px;">
-                    <p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-weight: 600;">📄 DOCUMENTS INDEXED</p>
+                    <p style="margin: 0; font-size: 0.9rem; color: #6b7280; font-weight: 600;">DOCUMENTS INDEXED</p>
                     <p style="margin: 0.25rem 0 0 0; font-size: 1.3rem; font-weight: 700; color: #1f2937;">{doc_count}</p>
                 </div>
                 <div>
-                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">💡 All queries will search this collection</p>
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">All queries will search this collection</p>
                 </div>
             </div>
         </div>
@@ -864,7 +880,7 @@ with tab1:
     else:
         st.markdown(f"""
         <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 5px solid #f59e0b; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);">
-            <p style="margin: 0; font-size: 1rem; color: #92400e; font-weight: 600;">⚠️ <strong>Active Collection:</strong> `{st.session_state.current_collection}` | 📄 <strong>No documents</strong></p>
+            <p style="margin: 0; font-size: 1rem; color: #92400e; font-weight: 600;"><strong>Active Collection:</strong> `{st.session_state.current_collection}` | <strong>No documents</strong></p>
             <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #78350f;">Please upload and process documents first in the sidebar!</p>
         </div>
         """, unsafe_allow_html=True)
@@ -876,7 +892,7 @@ with tab1:
             if message["role"] == "assistant" and "sources" in message:
                 # Show collection info if available
                 collection_used = message.get("collection_name", "Unknown")
-                with st.expander(f"📚 View Sources (from collection: {collection_used})"):
+                with st.expander(f"View Sources (from collection: {collection_used})"):
                     if not message["sources"]:
                         st.info("No sources retrieved for this response.")
                     else:
@@ -892,18 +908,18 @@ with tab1:
                                 <h4 style="margin: 0 0 0.75rem 0; color: #1f2937;">Source {i}</h4>
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 0.75rem;">
                                     <div>
-                                        <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">📁 Collection</p>
+                                        <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Collection</p>
                                         <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #1f2937;"><code style="background: #e5e7eb; padding: 0.2rem 0.5rem; border-radius: 4px;">{source_collection}</code></p>
                                     </div>
                                     <div>
-                                        <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">📄 Document</p>
+                                        <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Document</p>
                                         <p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #1f2937;"><code style="background: #e5e7eb; padding: 0.2rem 0.5rem; border-radius: 4px;">{source_file}</code></p>
                                     </div>
-                                    {f'<div><p style="margin: 0; font-size: 0.8rem; color: #6b7280;">📍 Chunk ID</p><p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #1f2937;">{chunk_id}</p></div>' if chunk_id != "N/A" else ''}
+                                    {f'<div><p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Chunk ID</p><p style="margin: 0.25rem 0 0 0; font-weight: 600; color: #1f2937;">{chunk_id}</p></div>' if chunk_id != "N/A" else ''}
                                 </div>
                             </div>
                             """, unsafe_allow_html=True)
-                            st.markdown("**📝 Content Preview:**")
+                            st.markdown("**Content Preview:**")
                             st.markdown(f"""
                             <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #e5e7eb; font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.6; color: #374151;">
                                 {source["content"][:500] + ("..." if len(source["content"]) > 500 else "")}
@@ -914,7 +930,7 @@ with tab1:
                             metadata_json = json.dumps(source_metadata, indent=2)
                             st.markdown(f"""
                             <details style="margin-top: 0.75rem;">
-                                <summary style="cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.5rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">🔍 View Full Metadata</summary>
+                                <summary style="cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.5rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">View Full Metadata</summary>
                                 <div style="margin-top: 0.5rem; padding: 1rem; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; overflow-x: auto;">
                                     <pre style="margin: 0; font-size: 0.85rem; color: #374151; white-space: pre-wrap; word-wrap: break-word;">{metadata_json}</pre>
                                 </div>
@@ -925,12 +941,12 @@ with tab1:
     
     # Show message if no documents uploaded
     if not st.session_state.chat_history:
-        st.info("👆 **Use the chat input at the bottom of the page to ask questions!**")
+        st.info("**Use the chat input at the bottom of the page to ask questions!**")
         
         # Show helpful info about collections
         if collection_info.get("document_count", 0) == 0:
             st.info("""
-            **💡 How Collections Work:**
+            **How Collections Work:**
             1. **Create/Select Collection** in the sidebar
             2. **Upload & Process** documents (they'll be added to the selected collection)
             3. **Ask Questions** - RAG will search only the active collection
@@ -941,13 +957,13 @@ with tab1:
 with tab2:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
-        <h2 style="margin-bottom: 0.5rem;">👤 My Profile</h2>
+        <h2 style="margin-bottom: 0.5rem;">My Profile</h2>
         <p style="color: #6b7280; margin: 0;">Your personal dashboard and performance insights</p>
     </div>
     """, unsafe_allow_html=True)
     
     # User Info Section
-    st.markdown("### 👤 Profile Information")
+    st.markdown("### Profile Information")
     col1, col2 = st.columns([2, 1])
     
     with col1:
@@ -979,7 +995,7 @@ with tab2:
     collection = st.session_state.collection_manager.get_current_collection()
     collection_info = collection.get_collection_info()
     
-    st.markdown("### 📊 My Performance Metrics")
+    st.markdown("### My Performance Metrics")
     
     # Key Metrics Cards
     col1, col2, col3, col4 = st.columns(4)
@@ -992,7 +1008,7 @@ with tab2:
     with col1:
         st.markdown(f"""
         <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">📚 Documents</p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">Documents</p>
             <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1f2937;">{doc_count}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1000,7 +1016,7 @@ with tab2:
     with col2:
         st.markdown(f"""
         <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">💬 Queries</p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">Queries</p>
             <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1f2937;">{query_count}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1008,7 +1024,7 @@ with tab2:
     with col3:
         st.markdown(f"""
         <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">⭐ Relevance</p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">Relevance</p>
             <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1f2937;">{avg_rel:.1%}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1016,7 +1032,7 @@ with tab2:
     with col4:
         st.markdown(f"""
         <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🎯 Quality</p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">Quality</p>
             <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: 700; color: #1f2937;">{avg_qual:.1%}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1030,15 +1046,15 @@ with tab2:
     avg_ctx_rec = eval_summary.get("avg_context_recall", 0.0)
     
     if avg_faith > 0 or avg_ans_rel > 0 or avg_ctx_prec > 0 or avg_ctx_rec > 0:
-        st.markdown("### 🎯 My RAGAS Evaluation Metrics")
-        st.info("📊 **RAGAS** (Retrieval Augmented Generation Assessment) metrics for your queries")
+        st.markdown("### My RAGAS Evaluation Metrics")
+        st.info("**RAGAS** (Retrieval Augmented Generation Assessment) metrics for your queries")
         
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             st.markdown(f"""
             <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">✓ Faithfulness</p>
+                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">Faithfulness</p>
                 <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{avg_faith:.1%}</p>
                 <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Grounded in context</p>
             </div>
@@ -1047,7 +1063,7 @@ with tab2:
         with col2:
             st.markdown(f"""
             <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🎯 Answer Relevancy</p>
+                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">Answer Relevancy</p>
                 <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{avg_ans_rel:.1%}</p>
                 <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Addresses question</p>
             </div>
@@ -1056,7 +1072,7 @@ with tab2:
         with col3:
             st.markdown(f"""
             <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">📍 Context Precision</p>
+                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">Context Precision</p>
                 <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{avg_ctx_prec:.1%}</p>
                 <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Retrieval precision</p>
             </div>
@@ -1065,7 +1081,7 @@ with tab2:
         with col4:
             st.markdown(f"""
             <div style="background: #f9fafb; padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
-                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">🔍 Context Recall</p>
+                <p style="margin: 0; font-size: 0.85rem; color: #6b7280; font-weight: 600;">Context Recall</p>
                 <p style="margin: 0.5rem 0 0 0; font-size: 1.8rem; font-weight: 700; color: #1f2937;">{avg_ctx_rec:.1%}</p>
                 <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #9ca3af;">Retrieval recall</p>
             </div>
@@ -1074,7 +1090,7 @@ with tab2:
         st.markdown("---")
     
     # Usage Statistics
-    st.markdown("### 📈 Usage Statistics")
+    st.markdown("### Usage Statistics")
     
     col1, col2 = st.columns(2)
     
@@ -1084,7 +1100,7 @@ with tab2:
         storage_val = collection_info.get('persist_directory', 'N/A')
         st.markdown(f"""
         <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; border-left: 5px solid #6b7280; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
-            <h4 style="margin: 0 0 1rem 0; color: #374151;">📊 Collection Stats</h4>
+            <h4 style="margin: 0 0 1rem 0; color: #374151;">Collection Stats</h4>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 <div>
                     <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Collection Name</p>
@@ -1107,7 +1123,7 @@ with tab2:
             avg_quality_val = eval_summary.get('avg_quality', 0.0)
             st.markdown(f"""
             <div style="background: #f9fafb; padding: 1.5rem; border-radius: 12px; border-left: 5px solid #6b7280; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
-                <h4 style="margin: 0 0 1rem 0; color: #374151;">⚡ Query Performance</h4>
+                <h4 style="margin: 0 0 1rem 0; color: #374151;">Query Performance</h4>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     <div>
                         <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Total Queries</p>
@@ -1127,7 +1143,7 @@ with tab2:
     
     # Recent Query History
     if st.session_state.chat_history:
-        st.markdown("### 💬 Recent Query History")
+        st.markdown("### Recent Query History")
         recent_queries = [msg for msg in st.session_state.chat_history if msg["role"] == "user"][-5:]
         
         if recent_queries:
@@ -1148,7 +1164,7 @@ with tab2:
     
     # Export Profile Data
     if query_count > 0:
-        st.markdown("### 💾 Export Profile Data")
+        st.markdown("### Export Profile Data")
         import json
         import datetime
         
@@ -1175,7 +1191,7 @@ with tab2:
         
         profile_json = json.dumps(profile_data, indent=2)
         st.download_button(
-            "📥 Download My Profile (JSON)",
+            "Download My Profile (JSON)",
             profile_json,
             file_name=f"my_profile_{datetime.datetime.now().strftime('%Y%m%d')}.json",
             mime="application/json",
@@ -1187,41 +1203,41 @@ with tab2:
 with tab3:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
-        <h2 style="margin-bottom: 0.5rem;">📊 Analytics Dashboard</h2>
+        <h2 style="margin-bottom: 0.5rem;">Analytics Dashboard</h2>
         <p style="color: #6b7280; margin: 0;">System-wide metrics and aggregate insights across all users</p>
     </div>
     """, unsafe_allow_html=True)
     
-    st.info("💡 **Note:** For your personal metrics, check the **👤 Profile** tab. This dashboard shows aggregate metrics across all users.")
+    st.info("**Note:** For your personal metrics, check the **Profile** tab. This dashboard shows aggregate metrics across all users.")
     st.markdown("---")
     
     # Overall Metrics Section
     if DATA_DIR:
         overall_metrics = get_overall_metrics(DATA_DIR)
         
-        st.caption("📊 Aggregate metrics across all users")
+        st.caption("Aggregate metrics across all users")
         
         # Overview Metrics
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("👥 Total Users", overall_metrics.get("total_users", 0))
+            st.metric("Total Users", overall_metrics.get("total_users", 0))
         
         with col2:
-            st.metric("💬 Total Queries", overall_metrics.get("total_queries", 0))
+            st.metric("Total Queries", overall_metrics.get("total_queries", 0))
         
         with col3:
             avg_rel = overall_metrics.get("avg_relevance", 0.0)
-            st.metric("⭐ Avg Relevance", f"{avg_rel:.1%}")
+            st.metric("Avg Relevance", f"{avg_rel:.1%}")
         
         with col4:
             avg_qual = overall_metrics.get("avg_quality", 0.0)
-            st.metric("🎯 Avg Quality", f"{avg_qual:.1%}")
+            st.metric("Avg Quality", f"{avg_qual:.1%}")
         
         st.markdown("---")
         
         # Overall Statistics
-        st.subheader("📈 Overall System Statistics")
+        st.subheader("Overall System Statistics")
         
         col1, col2 = st.columns(2)
         
@@ -1254,7 +1270,7 @@ with tab3:
         st.markdown("---")
         
         # Overall Metrics Summary
-        st.subheader("📄 Overall Metrics Summary")
+        st.subheader("Overall Metrics Summary")
         overall_metrics_data = {
             "Total Users": overall_metrics.get("total_users", 0),
             "Total Queries": overall_metrics.get("total_queries", 0),
@@ -1287,20 +1303,20 @@ with tab3:
             }
             overall_metrics_json = json.dumps(overall_metrics_export, indent=2)
             st.download_button(
-                "📥 Download Overall Metrics (JSON)",
+                "Download Overall Metrics (JSON)",
                 overall_metrics_json,
                 file_name=f"overall_metrics_{__import__('datetime').datetime.now().strftime('%Y%m%d')}.json",
                 mime="application/json",
                 use_container_width=True
             )
     else:
-        st.warning("⚠️ Overall metrics are not available in cloud deployment (file system access required).")
+        st.warning("Overall metrics are not available in cloud deployment (file system access required).")
 
 # Tab 4: Collections Management
 with tab4:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
-        <h2 style="margin-bottom: 0.5rem;">📁 Document Collections</h2>
+        <h2 style="margin-bottom: 0.5rem;">Document Collections</h2>
         <p style="color: #6b7280; margin: 0;">Organize and manage your document collections</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1326,7 +1342,7 @@ with tab4:
     st.subheader("All Collections")
     
     for col_name in st.session_state.collections_list:
-        with st.expander(f"📁 {col_name}", expanded=(col_name == st.session_state.current_collection)):
+        with st.expander(f"{col_name}", expanded=(col_name == st.session_state.current_collection)):
             collection = manager.get_collection(col_name)
             col_info = collection.get_collection_info()
             
@@ -1341,24 +1357,26 @@ with tab4:
                     collection = manager.get_current_collection()
                     st.session_state.vectorstore = collection.vectorstore
                     st.session_state.rag_chain = None
-                    st.success(f"✅ Switched to {col_name}")
+                    st.success(f"Switched to {col_name}")
                     st.rerun()
             
             with col2:
                 if col_name != "default":
-                    if st.button(f"🗑️ Delete Collection", key=f"delete_{col_name}", type="secondary"):
+                    if st.button(f"Delete Collection", key=f"delete_{col_name}", type="secondary"):
                         try:
                             # Use the manager's delete_collection method
                             manager.delete_collection(col_name)
                             if col_name in st.session_state.collections_list:
                                 st.session_state.collections_list.remove(col_name)
                                 save_user_collections_list()  # Save to disk
-                            st.success(f"✅ Successfully deleted collection: {col_name}")
+                            st.success(f"Successfully deleted collection: {col_name}")
                             st.rerun()
                         except ValueError as e:
-                            st.error(f"❌ {str(e)}")
+                            logger.error(f"Error deleting collection: {e}")
+                            st.error(f"{str(e)}")
                         except Exception as e:
-                            st.error(f"❌ Error deleting collection: {str(e)}")
+                            logger.error(f"Error deleting collection: {e}")
+                            st.error(f"Error deleting collection: {str(e)}")
     
     st.markdown("---")
     
@@ -1376,26 +1394,27 @@ with tab4:
             is_valid, error_msg = DocumentCollection.validate_collection_name(new_col)
             
             if not is_valid:
-                st.error(f"❌ Invalid collection name: {error_msg}")
+                st.error(f"Invalid collection name: {error_msg}")
             elif new_col in st.session_state.collections_list:
-                st.error("❌ Collection already exists!")
+                st.error("Collection already exists!")
             else:
                 try:
                     manager.create_collection(new_col)
                     st.session_state.collections_list.append(new_col)
                     save_user_collections_list()  # Save to disk
-                    st.success(f"✅ Created collection: {new_col}")
+                    st.success(f"Created collection: {new_col}")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Error creating collection: {str(e)}")
+                    logger.error(f"Error creating collection: {e}")
+                    st.error(f"Error creating collection: {str(e)}")
         else:
-            st.warning("⚠️ Please enter a collection name")
+            st.warning("Please enter a collection name")
 
 # Tab 5: Document Management
 with tab5:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
-        <h2 style="margin-bottom: 0.5rem;">📄 Document Management</h2>
+        <h2 style="margin-bottom: 0.5rem;">Document Management</h2>
         <p style="color: #6b7280; margin: 0;">View, manage, and delete indexed documents</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1415,18 +1434,18 @@ with tab5:
     st.markdown("---")
     
     # Document List
-    st.subheader("📋 Document List")
+    st.subheader("Document List")
     
     try:
         # Get documents grouped by source file using the new method
         source_files = collection.get_documents_by_source()
         
         if source_files:
-            st.info(f"📊 Found {len(source_files)} unique document(s) in this collection")
+            st.info(f"Found {len(source_files)} unique document(s) in this collection")
             
             # Display documents
             for source_file, info in source_files.items():
-                with st.expander(f"📄 {source_file} ({info['count']} chunks)", expanded=False):
+                with st.expander(f"{source_file} ({info['count']} chunks)", expanded=False):
                     col1, col2 = st.columns([3, 1])
                     with col1:
                         st.write(f"**Chunks:** {info['count']}")
@@ -1439,33 +1458,35 @@ with tab5:
                     with col2:
                         delete_key = f"delete_doc_{source_file}_{hash(source_file)}"
                         if st.button(
-                            "🗑️ Delete Document", 
+                            "Delete Document", 
                             key=delete_key, 
                             help="Delete all chunks from this document",
                             type="secondary"
                         ):
                             try:
                                 deleted_count = collection.delete_documents_by_source(source_file)
-                                st.success(f"✅ Successfully deleted {deleted_count} chunks from {source_file}")
+                                st.success(f"Successfully deleted {deleted_count} chunks from {source_file}")
                                 # Reset RAG chain if current collection
                                 if st.session_state.current_collection == collection.collection_name:
                                     st.session_state.rag_chain = None
                                     st.session_state.vectorstore = collection.vectorstore
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"❌ Error deleting document: {str(e)}")
+                                logger.error(f"Error deleting document: {e}")
+                                st.error(f"Error deleting document: {str(e)}")
         else:
-            st.info("📭 No documents in this collection. Upload documents in the sidebar!")
+            st.info("No documents in this collection. Upload documents in the sidebar!")
             
     except Exception as e:
-        st.error(f"❌ Error loading documents: {str(e)}")
-        st.info("💡 Try uploading a document first!")
+        logger.error(f"Error loading documents: {e}")
+        st.error(f"Error loading documents: {str(e)}")
+        st.info("Try uploading a document first!")
 
 # Tab 6: Export/Import
 with tab6:
     st.markdown("""
     <div style="margin-bottom: 2rem;">
-        <h2 style="margin-bottom: 0.5rem;">💾 Export & Import</h2>
+        <h2 style="margin-bottom: 0.5rem;">Export & Import</h2>
         <p style="color: #6b7280; margin: 0;">Export your data or import from previous sessions</p>
     </div>
     """, unsafe_allow_html=True)
@@ -1474,10 +1495,10 @@ with tab6:
     
     # Export Section
     with col1:
-        st.subheader("📥 Export Data")
+        st.subheader("Export Data")
         
         # Export Chat History
-        st.markdown("### 💬 Chat History")
+        st.markdown("### Chat History")
         if st.session_state.chat_history:
             chat_json = {
                 "chat_history": st.session_state.chat_history,
@@ -1486,20 +1507,20 @@ with tab6:
             import json
             chat_json_str = json.dumps(chat_json, indent=2)
             st.download_button(
-                "📥 Download Chat History (JSON)",
+                "Download Chat History (JSON)",
                 chat_json_str,
                 file_name=f"chat_history_{__import__('datetime').datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json",
                 use_container_width=True
             )
-            st.caption(f"💬 {len(st.session_state.chat_history)} messages")
+            st.caption(f"{len(st.session_state.chat_history)} messages")
         else:
             st.info("No chat history to export")
         
         st.markdown("---")
         
         # Export Evaluation Results
-        st.markdown("### 📊 Evaluation Results")
+        st.markdown("### Evaluation Results")
         evaluator = st.session_state.evaluator
         if evaluator.results:
             import tempfile
@@ -1522,20 +1543,20 @@ with tab6:
             }
             eval_json_str = json.dumps(eval_data, indent=2)
             st.download_button(
-                "📥 Download Evaluation Results (JSON)",
+                "Download Evaluation Results (JSON)",
                 eval_json_str,
                 file_name=f"evaluation_results_{__import__('datetime').datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json",
                 use_container_width=True
             )
-            st.caption(f"📊 {len(evaluator.results)} evaluation results")
+            st.caption(f"{len(evaluator.results)} evaluation results")
         else:
             st.info("No evaluation results to export")
         
         st.markdown("---")
         
         # Export Collection Info
-        st.markdown("### 📁 Collection Info")
+        st.markdown("### Collection Info")
         collection = st.session_state.collection_manager.get_current_collection()
         collection_info = collection.get_collection_info()
         collection_data = {
@@ -1547,7 +1568,7 @@ with tab6:
         import json
         collection_json_str = json.dumps(collection_data, indent=2)
         st.download_button(
-            "📥 Download Collection Info (JSON)",
+            "Download Collection Info (JSON)",
             collection_json_str,
             file_name=f"collection_info_{__import__('datetime').datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
             mime="application/json",
@@ -1556,10 +1577,10 @@ with tab6:
     
     # Import Section
     with col2:
-        st.subheader("📤 Import Data")
+        st.subheader("Import Data")
         
         # Import Chat History
-        st.markdown("### 💬 Chat History")
+        st.markdown("### Chat History")
         uploaded_chat = st.file_uploader(
             "Upload Chat History (JSON)",
             type=["json"],
@@ -1571,17 +1592,18 @@ with tab6:
                 chat_data = json.load(uploaded_chat)
                 if "chat_history" in chat_data:
                     st.session_state.chat_history = chat_data["chat_history"]
-                    st.success(f"✅ Imported {len(chat_data['chat_history'])} messages!")
+                    st.success(f"Imported {len(chat_data['chat_history'])} messages!")
                     st.rerun()
                 else:
-                    st.error("❌ Invalid chat history format")
+                    st.error("Invalid chat history format")
             except Exception as e:
-                st.error(f"❌ Error importing chat history: {str(e)}")
+                logger.error(f"Error importing chat history: {e}")
+                st.error(f"Error importing chat history: {str(e)}")
         
         st.markdown("---")
         
         # Import Evaluation Results
-        st.markdown("### 📊 Evaluation Results")
+        st.markdown("### Evaluation Results")
         uploaded_eval = st.file_uploader(
             "Upload Evaluation Results (JSON)",
             type=["json"],
@@ -1602,12 +1624,13 @@ with tab6:
                             relevance_score=result_data.get("relevance_score", 0.0),
                             answer_quality=result_data.get("answer_quality", 0.0),
                         )
-                    st.success(f"✅ Imported {len(eval_data['results'])} evaluation results!")
+                    st.success(f"Imported {len(eval_data['results'])} evaluation results!")
                     st.rerun()
                 else:
-                    st.error("❌ Invalid evaluation results format")
+                    st.error("Invalid evaluation results format")
             except Exception as e:
-                st.error(f"❌ Error importing evaluation results: {str(e)}")
+                logger.error(f"Error importing evaluation results: {e}")
+                st.error(f"Error importing evaluation results: {str(e)}")
         
-        st.info("💡 **Note:** Collection data is stored in ChromaDB and cannot be imported via JSON. Use the Collections tab to manage collections.")
+        st.info("**Note:** Collection data is stored in ChromaDB and cannot be imported via JSON. Use the Collections tab to manage collections.")
 
